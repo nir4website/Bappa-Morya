@@ -1,0 +1,8 @@
+{
+  "name": "Bappa Morya",
+  "description": "A festive, culturally authentic, and devotional Ganapati website celebrating Lord Ganesha, Ashtavinayak temples, and sacred Aartis.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
