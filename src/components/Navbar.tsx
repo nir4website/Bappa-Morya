@@ -24,7 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onShowToast, isAudioPlaying, onT
 
   const handleRingBell = () => {
     playTempleBell(840, 0.85);
-    onShowToast('🔔 Ghantinaad (घंटीनाद) — Ganapati Bappa Morya!');
+    onShowToast('🔔 Temple Bell (टण...) — Ganapati Bappa Morya!');
   };
 
   const handleBlowShankha = () => {

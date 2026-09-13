@@ -43,7 +43,7 @@ export const AudioPlayerBar: React.FC<AudioPlayerBarProps> = ({
 
   const handleRingBell = () => {
     playTempleBell(840, 0.85);
-    onShowToast('🔔 Ghantinaad (घंटीनाद) — Ganapati Bappa Morya!');
+    onShowToast('🔔 Temple Bell (टण...) — Ganapati Bappa Morya!');
   };
 
   const handleShankha = () => {

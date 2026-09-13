@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
-import { Sparkles, Music, Eye, Compass, ShieldCheck, Check, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Eye, Compass, ShieldCheck, Check, ChevronLeft, ChevronRight, Image as ImageIcon, Bell } from 'lucide-react';
 import { HERO_CHOICES, HeroImageChoice } from '../data/templesData.ts';
-import { playTempleBell } from '../utils/audioSynth.ts';
+import { playTempleBell, playBhajanTaal } from '../utils/audioSynth.ts';
+import { triggerRedHibiscusShower } from '../utils/flowerShower.ts';
 import { RedHibiscus } from './FestiveIcons.tsx';
 import { RangoliPattern } from './RangoliPattern.tsx';
 
 interface HeroProps {
-  onStartAarti: () => void;
   onShowToast: (msg: string) => void;
   onOpenLightbox?: (imgUrl: string, title: string, subtitle: string) => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onStartAarti, onShowToast, onOpenLightbox }) => {
-  const [flowerShower, setFlowerShower] = useState<number[]>([]);
+export const Hero: React.FC<HeroProps> = ({ onShowToast, onOpenLightbox }) => {
   const [selectedHeroIndex, setSelectedHeroIndex] = useState<number>(0);
   const currentHero: HeroImageChoice = HERO_CHOICES[selectedHeroIndex] || HERO_CHOICES[0];
 
@@ -38,16 +37,13 @@ export const Hero: React.FC<HeroProps> = ({ onStartAarti, onShowToast, onOpenLig
   };
 
   const handleOfferFlower = () => {
-    playTempleBell(784, 0.8);
-    onShowToast('🌺 Sacred Red Hibiscus (जास्वंद) offered at Bappa\'s lotus feet! Ganapati Bappa Morya!');
+    triggerRedHibiscusShower(32);
+    onShowToast('🌺 Sacred Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी) — Ganapati Bappa Morya!');
+  };
 
-    // Trigger visual petal shower
-    const showerBatch = Array.from({ length: 14 }, (_, i) => Date.now() + i);
-    setFlowerShower((prev) => [...prev, ...showerBatch]);
-
-    setTimeout(() => {
-      setFlowerShower((prev) => prev.filter((id) => !showerBatch.includes(id)));
-    }, 4500);
+  const handlePlayTaal = () => {
+    playTempleBell(840, 0.9);
+    onShowToast('🔔 Bell (टण...) — Ganapati Bappa Morya!');
   };
 
   return (
@@ -63,34 +59,27 @@ export const Hero: React.FC<HeroProps> = ({ onStartAarti, onShowToast, onOpenLig
       {/* Gold Ambient Glow Sphere */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-[#FFD700]/15 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Falling Flower Petal Shower Canvas */}
-      {flowerShower.map((id, index) => {
-        const leftPercent = (index * 7.2) % 94 + 3;
-        const delay = (index % 5) * 0.15;
-        const size = 24 + (index % 3) * 8;
-        return (
-          <div
-            key={id}
-            className="fixed top-0 z-50 pointer-events-none animate-flower-shower"
-            style={{
-              left: `${leftPercent}%`,
-              animationDelay: `${delay}s`,
-            }}
-          >
-            <RedHibiscus size={size} />
-          </div>
-        );
-      })}
-
       {/* Traditional Auspicious Header Banner */}
       <div className="max-w-4xl mx-auto px-4 mb-6 flex items-center justify-center gap-2 sm:gap-4 select-none opacity-95">
-        <RedHibiscus size={22} />
+        <div
+          onClick={handleOfferFlower}
+          className="cursor-pointer transition-transform hover:scale-130 active:scale-95"
+          title="Click for Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी)!"
+        >
+          <RedHibiscus size={24} />
+        </div>
         <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-[#FFD700] to-transparent" />
         <span className="text-sm sm:text-base font-bold tracking-widest text-[#FFFDD0] uppercase font-cinzel gold-glow">
           ॥ श्री गणेशाय नम: ॥
         </span>
         <div className="h-0.5 flex-1 bg-gradient-to-r from-transparent via-[#FFD700] to-transparent" />
-        <RedHibiscus size={22} />
+        <div
+          onClick={handleOfferFlower}
+          className="cursor-pointer transition-transform hover:scale-130 active:scale-95"
+          title="Click for Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी)!"
+        >
+          <RedHibiscus size={24} />
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -135,19 +124,10 @@ export const Hero: React.FC<HeroProps> = ({ onStartAarti, onShowToast, onOpenLig
 
             {/* Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              {/* Button 1: Listen to Aartis */}
-              <button
-                onClick={onStartAarti}
-                className="bg-[#8B4513] border-2 border-[#D4AF37] text-white px-7 py-3.5 rounded-xl font-bold text-base sm:text-lg flex items-center gap-2.5 shadow-xl hover:bg-[#5D2B0D] hover:border-[#FFD700] hover:scale-105 transition-all duration-200 active:scale-95 cursor-pointer"
-              >
-                <Music className="w-5 h-5 text-[#FFD700]" />
-                <span>Listen to Aartis</span>
-              </button>
-
-              {/* Button 2: Explore Darshan */}
+              {/* Primary CTA: Explore Darshan */}
               <a
                 href="#darshan"
-                className="bg-[#FFFDD0] text-[#8B4513] px-7 py-3.5 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:bg-white hover:scale-105 transition-all duration-200 flex items-center gap-2.5 active:scale-95"
+                className="bg-[#FFFDD0] text-[#8B4513] px-7 py-3.5 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:bg-white hover:scale-105 transition-all duration-200 flex items-center gap-2.5 active:scale-95 border-2 border-[#D4AF37]"
               >
                 <Eye className="w-5 h-5 text-[#8B4513]" />
                 <span>Temple Darshan</span>
@@ -156,11 +136,21 @@ export const Hero: React.FC<HeroProps> = ({ onStartAarti, onShowToast, onOpenLig
               {/* Interactive Quick Offering: Offer Red Hibiscus Flower */}
               <button
                 onClick={handleOfferFlower}
-                className="px-4 py-3 rounded-xl bg-[#72370F] text-[#FFD700] hover:text-[#FFFDD0] text-sm font-semibold border border-[#D4AF37]/60 hover:bg-[#5D2B0D] transition-all flex items-center gap-2 active:scale-95 shadow-md cursor-pointer group"
+                className="px-5 py-3.5 rounded-xl bg-[#72370F] text-[#FFD700] hover:text-[#FFFDD0] text-sm sm:text-base font-semibold border border-[#D4AF37]/60 hover:bg-[#5D2B0D] transition-all flex items-center gap-2 active:scale-95 shadow-md cursor-pointer group"
                 title="Offer Red Hibiscus Flower to Lord Ganesha"
               >
-                <RedHibiscus size={20} className="group-hover:scale-110 transition-transform" />
+                <RedHibiscus size={22} className="group-hover:scale-110 transition-transform" />
                 <span>Offer Jaswand Flower</span>
+              </button>
+
+              {/* Interactive Bell ("Tong") Button */}
+              <button
+                onClick={handlePlayTaal}
+                className="px-5 py-3.5 rounded-xl bg-[#72370F] text-[#FFD700] hover:text-[#FFFDD0] text-sm sm:text-base font-semibold border border-[#D4AF37]/60 hover:bg-[#5D2B0D] transition-all flex items-center gap-2 active:scale-95 shadow-md cursor-pointer group"
+                title="Ring Bell (टण...)"
+              >
+                <Bell className="w-4 h-4 text-[#FFD700] group-hover:scale-110 transition-transform" />
+                <span>Ring Bell (टण...)</span>
               </button>
             </div>
 
@@ -243,8 +233,8 @@ export const Hero: React.FC<HeroProps> = ({ onStartAarti, onShowToast, onOpenLig
                   {/* Bottom Image Caption */}
                   <div className="absolute bottom-3 inset-x-3 text-center pointer-events-none z-10">
                     <div className="inline-block px-4 py-1.5 rounded-full bg-[#8B4513]/95 backdrop-blur-sm border border-[#FFD700] shadow-lg">
-                      <span className="font-festive text-sm sm:text-base font-bold text-[#FFD700]">
-                        {currentHero.nameMr} 🙏
+                      <span className="font-festive text-sm sm:text-base font-bold text-[#FFD700] tracking-wide">
+                        ॥ ॐ गणपतये नमः ॥
                       </span>
                     </div>
                   </div>

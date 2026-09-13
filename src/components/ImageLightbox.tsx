@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, Download, MapPin, ExternalLink, Folder } from 'lucide-react';
+import { X, MapPin, ExternalLink, Folder } from 'lucide-react';
 
 interface ImageLightboxProps {
   isOpen: boolean;
@@ -39,23 +39,6 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
-
-  const handleDownload = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const link = document.createElement('a');
-      link.href = imageUrl;
-      const downloadName = fileName || `${title.replace(/[^a-zA-Z0-9\u0900-\u097F]/g, '-')}-bappa-morya.jpg`;
-      link.download = downloadName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      if (onShowToast) onShowToast(`📥 Downloaded ${downloadName}!`);
-    } catch {
-      window.open(imageUrl, '_blank');
-    }
-  };
 
   return (
     <div
@@ -108,16 +91,6 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({
                 <ExternalLink className="w-3 h-3 text-[#1A73E8]" />
               </a>
             )}
-
-            {/* Download */}
-            <button
-              onClick={handleDownload}
-              className="py-1.5 px-3 sm:py-2 sm:px-3.5 rounded-xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-xs sm:text-sm font-bold border border-white flex items-center gap-1.5 transition-all active:scale-95 shadow-md cursor-pointer"
-              title="Download wallpaper"
-            >
-              <Download className="w-3.5 h-3.5 text-[#8B4513]" />
-              <span className="hidden sm:inline">Download</span>
-            </button>
 
             {/* Close */}
             <button

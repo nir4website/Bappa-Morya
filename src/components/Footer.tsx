@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, ArrowUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { playTempleBell } from '../utils/audioSynth.ts';
 
 interface FooterProps {
@@ -9,19 +9,6 @@ interface FooterProps {
 export const Footer: React.FC<FooterProps> = ({ onShowToast }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleShareApp = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'BAPPA MORYA — Lord Ganesha & Ganesh Festival',
-        text: 'Experience the divine darshan of famous Ganapati temples, the 8 Ashtavinayak pilgrimage, and Marathi Aartis on Bappa Morya!',
-        url: window.location.href,
-      }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      onShowToast('🔗 Website link copied to clipboard! Share with family and friends.');
-    }
   };
 
   const handleRingBell = () => {
@@ -88,13 +75,13 @@ export const Footer: React.FC<FooterProps> = ({ onShowToast }) => {
             </ul>
           </div>
 
-          {/* Col 3: Features & Downloads */}
+          {/* Col 3: Sacred Features */}
           <div className="space-y-3">
             <h4 className="font-festive text-base font-bold text-[#FFD700]">
               Sacred Features
             </h4>
             <ul className="space-y-2 text-xs">
-              <li><a href="#download-gallery" className="hover:text-[#FFD700] transition-colors">HD Wallpaper Downloads</a></li>
+              <li><a href="#download-gallery" className="hover:text-[#FFD700] transition-colors">HD Wallpaper Gallery</a></li>
               <li><a href="#aarti" className="hover:text-[#FFD700] transition-colors">Interactive Brass Aarti Thali</a></li>
               <li><a href="#mantra" className="hover:text-[#FFD700] transition-colors">Pushpavrushti (Flower Shower)</a></li>
               <li><a href="#home" className="hover:text-[#FFD700] transition-colors">Handheld Bell & Shankha Audio</a></li>
@@ -109,13 +96,6 @@ export const Footer: React.FC<FooterProps> = ({ onShowToast }) => {
             <p className="text-xs text-[#FFFDD0]/85">
               Spread festive joy by sharing this devotional website with family and friends.
             </p>
-            <button
-              onClick={handleShareApp}
-              className="mt-1 py-2.5 px-4 rounded-xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-xs font-bold border border-white shadow-md flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
-            >
-              <Share2 className="w-4 h-4 text-[#8B4513]" />
-              <span>Share Website</span>
-            </button>
           </div>
 
         </div>

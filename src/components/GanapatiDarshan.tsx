@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { Download, Eye, MapPin, Sparkles, Info } from 'lucide-react';
+import { Eye, MapPin, Sparkles, Info } from 'lucide-react';
 import { FAMOUS_TEMPLES } from '../data/templesData.ts';
 import { GanapatiTemple } from '../types.ts';
 
 interface GanapatiDarshanProps {
   onOpenLightbox: (imageUrl: string, title: string, subtitle: string) => void;
-  onShowToast: (msg: string) => void;
+  onShowToast?: (msg: string) => void;
 }
 
-export const GanapatiDarshan: React.FC<GanapatiDarshanProps> = ({ onOpenLightbox, onShowToast }) => {
+export const GanapatiDarshan: React.FC<GanapatiDarshanProps> = ({ onOpenLightbox }) => {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'mumbai' | 'pune'>('all');
   const [expandedInfoId, setExpandedInfoId] = useState<string | null>(null);
 
@@ -18,23 +18,6 @@ export const GanapatiDarshan: React.FC<GanapatiDarshanProps> = ({ onOpenLightbox
     if (selectedFilter === 'pune') return temple.district.includes('Pune') || temple.location.includes('Pune') || temple.district.includes('Ahilyanagar');
     return true;
   });
-
-  const handleDownload = (temple: GanapatiTemple, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const link = document.createElement('a');
-      link.href = temple.image;
-      link.download = temple.downloadFilename;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      onShowToast(`📥 Downloaded ${temple.nameEn} image!`);
-    } catch {
-      window.open(temple.image, '_blank');
-      onShowToast(`📥 Opened ${temple.nameEn} image in new tab!`);
-    }
-  };
 
   const toggleInfo = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -151,13 +134,14 @@ export const GanapatiDarshan: React.FC<GanapatiDarshanProps> = ({ onOpenLightbox
                     <Info className="w-4 h-4" />
                   </button>
 
-                  {/* Download Button */}
+                  {/* View Darshan Button */}
                   <button
-                    onClick={(e) => handleDownload(temple, e)}
+                    onClick={() => onOpenLightbox(temple.image, `${temple.nameEn} (${temple.name})`, temple.location)}
                     className="flex-1 py-2.5 px-4 rounded-xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-xs sm:text-sm font-bold border border-white shadow-md transition-all flex items-center justify-center gap-2 active:scale-95 group/btn cursor-pointer"
+                    title={`View Darshan of ${temple.nameEn}`}
                   >
-                    <Download className="w-4 h-4 text-[#8B4513]" />
-                    <span>Download Image</span>
+                    <Eye className="w-4 h-4 text-[#8B4513]" />
+                    <span>View Darshan</span>
                   </button>
                 </div>
 

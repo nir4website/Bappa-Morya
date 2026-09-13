@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar.tsx';
 import { OfflineStatusIndicator } from './components/OfflineStatusIndicator.tsx';
 import { FloatingDecorations } from './components/FloatingDecorations.tsx';
+import { FlowerShowerOverlay } from './components/FlowerShowerOverlay.tsx';
 import { Hero } from './components/Hero.tsx';
 import { GanapatiDarshan } from './components/GanapatiDarshan.tsx';
 import { AshtavinayakSection } from './components/AshtavinayakSection.tsx';
@@ -145,6 +146,9 @@ export default function App() {
       {/* Floating Brass Pantis, Traditional Brass Temple Bells, Red Hibiscus Flowers & Rangoli */}
       <FloatingDecorations onShowToast={showToast} />
 
+      {/* Global Red Hibiscus Flower Shower Layer (जास्वंद पुष्पवृष्टी) */}
+      <FlowerShowerOverlay />
+
       {/* Sticky Header Navigation */}
       <Navbar
         onShowToast={showToast}
@@ -164,11 +168,6 @@ export default function App() {
       <main className="flex-1">
         {/* 1. Hero Section with Animated Rangoli, Red Hibiscus Offering & Authentic Handheld Bell */}
         <Hero
-          onStartAarti={() => {
-            handlePlayAarti(AARTIS_DATA[0]);
-            const aartiEl = document.getElementById('aarti');
-            if (aartiEl) aartiEl.scrollIntoView({ behavior: 'smooth' });
-          }}
           onShowToast={showToast}
           onOpenLightbox={handleOpenLightbox}
         />
@@ -203,7 +202,7 @@ export default function App() {
           onShowToast={showToast}
         />
 
-        {/* 6. Download Hub (Wallpapers & Complete Marathi Aarti Collection) */}
+        {/* 6. Sacred Wallpaper & Darshan Gallery */}
         <DownloadGallery
           onOpenLightbox={handleOpenLightbox}
           onShowToast={showToast}

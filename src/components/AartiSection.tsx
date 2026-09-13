@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { 
-  Play, Pause, Copy, Check, Download, Share2, Volume2, 
+  Play, Pause, Copy, Check, Share2, 
   Sparkles, Flame, ChevronDown, ChevronUp, Music
 } from 'lucide-react';
 import { AARTIS_DATA } from '../data/aartisData.ts';
 import { AartiItem } from '../types.ts';
-import { playTempleBell, playKartal } from '../utils/audioSynth.ts';
-import { BrassPanti, RedHibiscus, HandheldPoojaBellIcon } from './FestiveIcons.tsx';
+import { playTempleBell, playKartal, playHousePujaGhantiContinuous } from '../utils/audioSynth.ts';
+import { triggerRedHibiscusShower } from '../utils/flowerShower.ts';
+import { BrassPanti, RedHibiscus, HandheldPoojaBellIcon, HaldiKumkumShendurBoxes, MarigoldFlower, PoojaBellStanding } from './FestiveIcons.tsx';
 import { RangoliPattern } from './RangoliPattern.tsx';
 
 interface AartiSectionProps {
@@ -27,7 +28,9 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
   const [expandedAartiId, setExpandedAartiId] = useState<string>('sukhkarta-dukhharta');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isRotatingThali, setIsRotatingThali] = useState<boolean>(false);
-  const [thaliFlowers, setThaliFlowers] = useState<number>(5);
+  const [thaliFlowers, setThaliFlowers] = useState<number>(6);
+  const [isBellRinging, setIsBellRinging] = useState<boolean>(false);
+  const [tilakApplied, setTilakApplied] = useState<boolean>(false);
 
   const handleCopy = (aarti: AartiItem) => {
     const textToCopy = `${aarti.title}\n${aarti.subTitle}\n\n${aarti.lyrics.join('\n')}\n\n— Bappa Morya (गणपती बाप्पा मोरया)`;
@@ -37,25 +40,11 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
     setTimeout(() => setCopiedId(null), 2500);
   };
 
-  const handleDownloadLyrics = (aarti: AartiItem) => {
-    const textContent = `${aarti.title}\n${aarti.subTitle}\n\n${aarti.lyrics.join('\n')}\n\nभावार्थ:\n${aarti.meaning || ''}\n\n॥ गणपती बाप्पा मोरया, मंगलमूर्ती मोरया ॥\n`;
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${aarti.id}-aarti-marathi.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    onShowToast(`📥 Downloaded Aarti file: ${aarti.title}`);
-  };
-
   const handleShare = (aarti: AartiItem) => {
     if (navigator.share) {
       navigator.share({
         title: aarti.title,
-        text: `${aarti.title}\n${aarti.lyrics.slice(0, 7).join('\n')}...\n\nRead & Listen to full Aarti on Bappa Morya!`,
+        text: `${aarti.title}\n${aarti.lyrics.slice(0, 7).join('\n')}...\n\nRead full Aarti on Bappa Morya!`,
         url: window.location.href
       }).catch(() => {});
     } else {
@@ -65,16 +54,43 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
 
   const handleOwalAarti = () => {
     setIsRotatingThali(true);
-    playTempleBell(2250, 0.9);
+    setIsBellRinging(true);
+    playHousePujaGhantiContinuous(4.5, 0.9);
     playKartal(0.5);
     onShowToast('🪔 Jai Dev Jai Dev Jai Mangal Moorti! Performed traditional Aarti!');
-    setTimeout(() => setIsRotatingThali(false), 4000);
+    setTimeout(() => {
+      setIsRotatingThali(false);
+      setIsBellRinging(false);
+    }, 4500);
   };
 
-  const handleAddFlowerToThali = () => {
-    playTempleBell(2400, 0.65);
+  const handleRingThaliBell = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setIsBellRinging(true);
+    playHousePujaGhantiContinuous(3.5, 0.9);
+    onShowToast('🔔 House Puja Bell (घरगुती पूजा घंटी) — अखंड घंटानाद!');
+    setTimeout(() => setIsBellRinging(false), 3500);
+  };
+
+  const handleApplyTilak = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setTilakApplied(true);
+    playTempleBell(980, 0.65);
+    onShowToast('✨ Applied holy Haldi, Kumkum & Shendur (हळद-कुंकू-शेंदूर) tilak to Lord Ganesha!');
+    setTimeout(() => setTilakApplied(false), 3000);
+  };
+
+  const handleDiyaClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    playTempleBell(980, 0.6);
+    onShowToast('🪔 Sacred Twin Niranjan Diyas (२ निरांजन) glowing with holy ghee!');
+  };
+
+  const handleAddFlowerToThali = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     setThaliFlowers(prev => prev + 1);
-    onShowToast('🌺 Offered sacred Red Hibiscus (जास्वंद) into the Aarti Thali!');
+    triggerRedHibiscusShower(32);
+    onShowToast('🌺 Sacred Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी) — Ganapati Bappa Morya!');
   };
 
   return (
@@ -101,7 +117,7 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
           </div>
 
           <p className="text-base sm:text-lg text-[#FFFDD0]/90">
-            Read and listen to traditional Marathi Aartis for Lord Ganesha, Devi, Shankar, Ghalin Lotangan, and Mantrapushpanjali.
+            Read traditional Marathi Aartis for Lord Ganesha, Devi, Shankar, Ghalin Lotangan, and Mantrapushpanjali.
           </p>
 
           <div className="h-0.5 w-28 mx-auto bg-gradient-to-r from-transparent via-[#FFD700] to-transparent mt-2" />
@@ -195,7 +211,7 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                         ))}
                       </div>
 
-                      {/* Action Tools: Copy, Download, Share, Play */}
+                      {/* Action Tools: Copy, Share, Play */}
                       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                         <div className="flex items-center gap-2">
                           {/* Copy Button */}
@@ -216,15 +232,6 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                             )}
                           </button>
 
-                          {/* Download Lyrics */}
-                          <button
-                            onClick={() => handleDownloadLyrics(aarti)}
-                            className="px-3.5 py-2 rounded-xl bg-[#72370F] hover:bg-[#5D2B0D] text-[#FFFDD0] text-xs sm:text-sm font-semibold border border-[#D4AF37]/50 transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
-                          >
-                            <Download className="w-4 h-4 text-[#FFD700]" />
-                            <span>Download Text</span>
-                          </button>
-
                           {/* Share */}
                           <button
                             onClick={() => handleShare(aarti)}
@@ -234,27 +241,6 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                             <span>Share</span>
                           </button>
                         </div>
-
-                        {/* Audio Play button */}
-                        <button
-                          onClick={() => {
-                            if (isTrackPlaying) onPauseTrack();
-                            else onPlayTrack(aarti);
-                          }}
-                          className="px-4 py-2 rounded-xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-xs sm:text-sm font-bold border border-white shadow-md transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
-                        >
-                          {isTrackPlaying ? (
-                            <>
-                              <Pause className="w-4 h-4" />
-                              <span>Pause Aarti</span>
-                            </>
-                          ) : (
-                            <>
-                              <Volume2 className="w-4 h-4" />
-                              <span>Listen Melody</span>
-                            </>
-                          )}
-                        </button>
                       </div>
 
                     </div>
@@ -275,57 +261,160 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                   <span>Interactive Puja Ritual</span>
                 </div>
                 <h3 className="font-festive text-2xl font-bold text-[#FFFDD0]">
-                  Traditional Brass Aarti Thali
+                  Traditional Silver Aarti Thali (चांदीचे ताट)
                 </h3>
                 <p className="text-xs text-[#FFFDD0]/90">
-                  Perform Aarti, ring the sacred traditional temple bell, and offer sacred Red Jaswand flowers.
+                  Lustrous silver platter adorned with 2 glowing Diyas, Haldi-Kumkum-Shendur boxes, Ghanti, and fresh flowers.
                 </p>
               </div>
 
-              {/* Interactive Visual Brass Aarti Thali with Brass Panti & Rangoli */}
-              <div className="relative py-4 flex items-center justify-center">
-                <div 
-                  className={`relative w-60 h-60 sm:w-68 sm:h-68 rounded-full bg-gradient-to-tr from-[#997a15] via-[#ffd700] to-[#8a5d12] p-3.5 shadow-2xl border-4 border-[#ffed99] flex items-center justify-center transition-transform duration-1000 ${
-                    isRotatingThali ? 'rotate-180 scale-105 aarti-plate-glow' : 'hover:scale-102'
+              {/* Interactive Visual Brass Aarti Thali with 2 Diyas, Bell, Haldi-Kumkum-Shendur & Flowers */}
+              <div className="relative py-2 sm:py-4 flex items-center justify-center">
+                <div
+                  className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-full p-3.5 shadow-2xl transition-all duration-700 select-none ${
+                    isRotatingThali ? 'rotate-360 scale-105 aarti-plate-glow' : 'hover:scale-102'
                   }`}
+                  style={{
+                    background: 'radial-gradient(circle, #ffe87c 0%, #ffd700 25%, #d4af37 55%, #8a5d12 85%, #5d2b0d 100%)',
+                    boxShadow: isRotatingThali
+                      ? '0 0 50px rgba(255, 215, 0, 0.8), 0 0 25px rgba(227, 93, 37, 0.6), inset 0 0 20px rgba(255, 235, 120, 0.8)'
+                      : '0 12px 30px rgba(0,0,0,0.6), inset 0 0 15px rgba(255, 235, 120, 0.6)',
+                    border: '4px solid #FFFDD0',
+                    transition: 'transform 4.5s ease-in-out, box-shadow 0.8s ease'
+                  }}
                 >
-                  {/* Subtle Background Rangoli inside the Thali */}
-                  <div className="absolute inset-4 opacity-25 pointer-events-none">
-                    <RangoliPattern variant="lotus" size="100%" />
-                  </div>
+                  {/* Outer Embossed Brass Scallop Petal Rim with Studs */}
+                  {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                    <div
+                      key={deg}
+                      className="absolute w-2 h-2 rounded-full bg-[#FFFDD0] border border-[#72370F] shadow-sm pointer-events-none"
+                      style={{
+                        top: '50%',
+                        left: '50%',
+                        transform: `rotate(${deg}deg) translate(0, -134px) translate(-50%, -50%)`
+                      }}
+                    />
+                  ))}
 
-                  {/* Inner Brass Plate Basin */}
-                  <div className="w-full h-full rounded-full bg-gradient-to-b from-[#5D2B0D] via-[#3a190b] to-[#5D2B0D] border-2 border-dashed border-[#FFD700] flex flex-col items-center justify-center relative p-4 text-center">
+                  {/* Inner Silver Plate Basin (चांदीचे ताट) */}
+                  <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_center,_#FFFFFF_0%,_#E2E8F0_35%,_#CBD5E1_68%,_#94A3B8_100%)] shadow-[inset_0_3px_15px_rgba(0,0,0,0.22),_0_2px_8px_rgba(0,0,0,0.15)] border-2 border-dashed border-[#94A3B8] relative overflow-hidden flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
                     
-                    {/* Center Brass Panti with Radiant Flame */}
-                    <div className="relative z-10 flex flex-col items-center">
-                      <BrassPanti size={44} showFlame={true} />
+                    {/* Subtle Silver Engraved Rangoli Mandala */}
+                    <div className="absolute inset-2 opacity-25 text-[#334155] pointer-events-none">
+                      <RangoliPattern variant="lotus" size="100%" />
                     </div>
 
-                    {/* Surrounding Red Hibiscus Flowers */}
-                    <div className="absolute top-4 inset-x-0 flex justify-center gap-6 z-10">
-                      <RedHibiscus size={26} className="animate-bounce" />
-                      <RedHibiscus size={24} className="animate-bounce" />
+                    {/* Concentric Engraved Silver Ring Lines */}
+                    <div className="absolute inset-8 rounded-full border border-[#64748B]/35 pointer-events-none" />
+                    <div className="absolute inset-16 rounded-full border border-[#94A3B8]/40 pointer-events-none" />
+
+                    {/* =========================================================
+                        TOP SECTION: Haldi, Kumkum, and Shendur Boxes (हळद-कुंकू-शेंदूर)
+                       ========================================================= */}
+                    <div className="relative z-20 flex flex-col items-center mt-1">
+                      <HaldiKumkumShendurBoxes size={72} onClick={handleApplyTilak} />
+                      <div className="mt-0.5 px-2 py-0.5 rounded-full bg-[#1E293B]/85 border border-[#94A3B8]/70 text-[9px] font-bold text-[#F8FAFC] tracking-wider pointer-events-none shadow-sm">
+                        हळद • कुंकू • शेंदूर
+                      </div>
                     </div>
 
-                    <div className="absolute bottom-4 inset-x-0 flex justify-center gap-4 z-10">
-                      <RedHibiscus size={22} />
-                      <span className="text-sm">🌼</span>
-                      <RedHibiscus size={22} />
+                    {/* =========================================================
+                        MIDDLE SECTION: 2 Diyas (Left & Right) + Brass Pooja Bell
+                       ========================================================= */}
+                    <div className="relative z-20 w-full px-2 flex items-center justify-between my-auto">
+                      {/* Left Diya (निरांजन १) */}
+                      <div
+                        onClick={handleDiyaClick}
+                        className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-95 group"
+                        title="Left Brass Diya (डावी निरांजन) - Tap for Blessing"
+                      >
+                        <BrassPanti size={42} showFlame={true} />
+                        <span className="text-[8px] font-bold text-[#1E293B] group-hover:text-[#991B1B] transition-colors font-devanagari-serif">
+                          निरांजन
+                        </span>
+                      </div>
+
+                      {/* Center Standing Brass Pooja Bell (पितळी पूजा घंटी) */}
+                      <div
+                        onClick={handleRingThaliBell}
+                        className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-90 group px-1"
+                        title="Tap to Ring House Puja Bell (घरगुती पूजा घंटी अखंड नाद)"
+                      >
+                        <PoojaBellStanding size={38} isRinging={isBellRinging} />
+                        <span className="text-[8px] font-bold text-[#1E293B] tracking-wider font-devanagari-serif mt-0.5">
+                          {isBellRinging ? '🔔 अखंड नाद...' : '🔔 पूजा घंटी'}
+                        </span>
+                      </div>
+
+                      {/* Right Diya (निरांजन २) */}
+                      <div
+                        onClick={handleDiyaClick}
+                        className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-95 group"
+                        title="Right Brass Diya (उजवी निरांजन) - Tap for Blessing"
+                      >
+                        <BrassPanti size={42} showFlame={true} />
+                        <span className="text-[8px] font-bold text-[#1E293B] group-hover:text-[#991B1B] transition-colors font-devanagari-serif">
+                          निरांजन
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="mt-1 text-center z-10">
-                      <span className="text-[11px] font-bold text-[#FFD700] tracking-wider uppercase font-devanagari-serif">
-                        ॥ ॐ मंगलमूर्ती मोरया ॥
-                      </span>
+                    {/* =========================================================
+                        BOTTOM SECTION: Sacred Flowers (Jaswand & Marigold) + Petals
+                       ========================================================= */}
+                    <div className="relative z-20 w-full flex flex-col items-center pb-1">
+                      {/* Floral Arrangement on Thali */}
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        {/* Orange Marigold (झेंडू) */}
+                        <div
+                          onClick={handleAddFlowerToThali}
+                          className="cursor-pointer transition-transform hover:scale-125 active:scale-90"
+                          title="Click for Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी)!"
+                        >
+                          <MarigoldFlower size={26} variant="orange" />
+                        </div>
+                        
+                        {/* Red Hibiscus (जास्वंद) */}
+                        <div
+                          onClick={handleAddFlowerToThali}
+                          className="cursor-pointer transition-transform hover:scale-130 active:scale-90 animate-pulse group/flower"
+                          title="Click for Sacred Red Hibiscus Shower (जास्वंद पुष्पवृष्टी)!"
+                        >
+                          <RedHibiscus size={36} className="drop-shadow-[0_2px_8px_rgba(255,0,0,0.5)]" />
+                        </div>
+
+                        {/* Yellow Marigold (झेंडू) */}
+                        <div
+                          onClick={handleAddFlowerToThali}
+                          className="cursor-pointer transition-transform hover:scale-125 active:scale-90"
+                          title="Click for Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी)!"
+                        >
+                          <MarigoldFlower size={26} variant="yellow" />
+                        </div>
+
+                        {/* Dynamic additional flowers if user offered more */}
+                        {thaliFlowers > 6 && (
+                          <div
+                            onClick={handleAddFlowerToThali}
+                            className="cursor-pointer transition-transform hover:scale-125"
+                            title="Click for Red Hibiscus Shower"
+                          >
+                            <RedHibiscus size={24} className="hidden sm:inline-block animate-pulse" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Scattered Petals & Sacred Inscription */}
+                      <div className="flex items-center gap-1.5 text-center">
+                        <span className="text-[10px] text-[#DC2626] select-none">🌸</span>
+                        <span className="text-[10px] sm:text-[11px] font-extrabold text-[#991B1B] tracking-wider uppercase font-devanagari-serif drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
+                          ॥ ॐ गं गणपतये नमः ॥
+                        </span>
+                        <span className="text-[10px] text-[#EA580C] select-none">🌼</span>
+                      </div>
                     </div>
+
                   </div>
-
-                  {/* Rim Accent Dots */}
-                  <div className="absolute top-1 left-1 w-3 h-3 bg-[#FFD700] rounded-full border border-white" />
-                  <div className="absolute top-1 right-1 w-3 h-3 bg-[#FFD700] rounded-full border border-white" />
-                  <div className="absolute bottom-1 left-1 w-3 h-3 bg-[#FFD700] rounded-full border border-white" />
-                  <div className="absolute bottom-1 right-1 w-3 h-3 bg-[#FFD700] rounded-full border border-white" />
                 </div>
               </div>
 
@@ -341,24 +430,39 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                 </button>
 
                 {/* Additional Ritual Actions */}
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-3 gap-2">
+                  {/* Bell Button */}
                   <button
-                    onClick={() => {
-                      playTempleBell(840, 0.85);
-                      onShowToast('🔔 Sacred Ghantinaad (घंटीनाद) — जय गणेश देवा!');
-                    }}
-                    className="py-2.5 px-3 rounded-xl bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFD700] text-xs sm:text-sm font-semibold border border-[#D4AF37]/60 flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+                    onClick={handleRingThaliBell}
+                    className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all flex flex-col sm:flex-row items-center justify-center gap-1 active:scale-95 cursor-pointer ${
+                      isBellRinging
+                        ? 'bg-[#8B4513] text-[#FFE87C] border-[#FFD700] shadow-[0_0_12px_rgba(255,215,0,0.6)] animate-pulse'
+                        : 'bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFD700] border-[#D4AF37]/60'
+                    }`}
+                    title="Ring House Puja Bell (घरगुती पूजा घंटी अखंड नाद)"
                   >
-                    <HandheldPoojaBellIcon size={20} />
-                    <span>Ghantinaad (घंटीनाद)</span>
+                    <HandheldPoojaBellIcon size={18} />
+                    <span className="truncate">{isBellRinging ? 'अखंड नाद सुरू...' : 'पूजा घंटी'}</span>
                   </button>
 
+                  {/* Haldi Kumkum Button */}
+                  <button
+                    onClick={handleApplyTilak}
+                    className="py-2.5 px-2 rounded-xl bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFE87C] text-xs font-semibold border border-[#D4AF37]/60 flex flex-col sm:flex-row items-center justify-center gap-1 active:scale-95 cursor-pointer"
+                    title="Apply Sacred Haldi-Kumkum Tilak"
+                  >
+                    <span className="text-sm">✨</span>
+                    <span className="truncate">हळद-कुंकू</span>
+                  </button>
+
+                  {/* Offer Flower Button (पुष्पवृष्टी) */}
                   <button
                     onClick={handleAddFlowerToThali}
-                    className="py-2.5 px-3 rounded-xl bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFFDD0] text-xs sm:text-sm font-semibold border border-[#D4AF37]/60 flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+                    className="py-2.5 px-2 rounded-xl bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFFDD0] text-xs font-semibold border border-[#D4AF37]/60 flex flex-col sm:flex-row items-center justify-center gap-1 active:scale-95 cursor-pointer"
+                    title="Click for Red Hibiscus Flower Shower (जास्वंद पुष्पवृष्टी)"
                   >
-                    <RedHibiscus size={18} />
-                    <span>Offer Jaswand ({thaliFlowers})</span>
+                    <RedHibiscus size={16} />
+                    <span className="truncate">पुष्पवृष्टी ({thaliFlowers})</span>
                   </button>
                 </div>
               </div>

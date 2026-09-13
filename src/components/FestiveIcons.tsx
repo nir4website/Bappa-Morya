@@ -334,3 +334,293 @@ export const HandheldPoojaBellIcon: React.FC<{
     </svg>
   );
 };
+
+/**
+ * Traditional Brass Standing Pooja Bell with Clapper for Thali (ताटातील पितळी पूजा घंटी)
+ * With continuous house puja bell ringing animation and soundwave ripples
+ */
+export const PoojaBellStanding: React.FC<{
+  size?: number;
+  isRinging?: boolean;
+  className?: string;
+}> = ({ size = 44, isRinging = false, className = '' }) => {
+  return (
+    <div
+      className={`relative inline-flex items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-110 select-none ${
+        isRinging ? 'animate-bell-continuous' : ''
+      } ${className}`}
+      style={{ width: size, height: size * 1.3 }}
+      title="घरगुती पूजा घंटी (House Puja Bell) - अखंड घंटानाद"
+    >
+      {/* Radiating Soundwave Ripples when Continuously Ringing */}
+      {isRinging && (
+        <>
+          <span className="absolute -inset-2 rounded-full border-2 border-[#FFD700]/70 animate-soundwave pointer-events-none" />
+          <span className="absolute -inset-4 rounded-full border border-[#FFE87C]/50 animate-soundwave [animation-delay:0.2s] pointer-events-none" />
+        </>
+      )}
+
+      <svg
+        width={size}
+        height={size * 1.3}
+        viewBox="0 0 40 52"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className={isRinging ? 'drop-shadow-[0_0_12px_rgba(255,215,0,0.9)]' : 'drop-shadow-[0_3px_6px_rgba(0,0,0,0.4)]'}
+      >
+        <defs>
+          <linearGradient id="bellBrassStanding" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#72370F" />
+            <stop offset="25%" stopColor="#D4AF37" />
+            <stop offset="50%" stopColor="#FFE87C" />
+            <stop offset="75%" stopColor="#FFD700" />
+            <stop offset="100%" stopColor="#5D2B0D" />
+          </linearGradient>
+          <radialGradient id="bellDomeLight" cx="40%" cy="30%" r="60%">
+            <stop offset="0%" stopColor="#FFFDD0" stopOpacity="0.9" />
+            <stop offset="60%" stopColor="#FFD700" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#72370F" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Garuda / Nandi Finial at the handle top */}
+        <path
+          d="M 20,2 C 17,2 17,7 20,7 C 23,7 23,2 20,2 Z"
+          fill="url(#bellBrassStanding)"
+          stroke="#FFD700"
+          strokeWidth="0.6"
+        />
+        {/* Handle Stem with Knurled Rings */}
+        <line x1="20" y1="7" x2="20" y2="22" stroke="url(#bellBrassStanding)" strokeWidth="3.5" strokeLinecap="round" />
+        <ellipse cx="20" cy="12" rx="3.5" ry="1.5" fill="#FFD700" stroke="#72370F" strokeWidth="0.4" />
+        <ellipse cx="20" cy="18" rx="4" ry="1.8" fill="#FFD700" stroke="#72370F" strokeWidth="0.4" />
+
+        {/* Bell Body Dome */}
+        <path
+          d="M 14,22 C 14,22 8,33 5,41 C 4,44 7,45 20,45 C 33,45 36,44 35,41 C 32,33 26,22 26,22 Z"
+          fill="url(#bellBrassStanding)"
+          stroke="#FFD700"
+          strokeWidth="1.2"
+        />
+        <path
+          d="M 14,22 C 14,22 8,33 5,41 C 4,44 7,45 20,45 C 33,45 36,44 35,41 C 32,33 26,22 26,22 Z"
+          fill="url(#bellDomeLight)"
+        />
+
+        {/* Engraved Bands on Bell */}
+        <path d="M 11,32 Q 20,34 29,32" stroke="#5D2B0D" strokeWidth="0.8" fill="none" />
+        <path d="M 8,38 Q 20,41 32,38" stroke="#FFE87C" strokeWidth="0.8" fill="none" />
+
+        {/* Flanged Bottom Lip */}
+        <ellipse cx="20" cy="45" rx="15" ry="3.5" fill="url(#bellBrassStanding)" stroke="#FFD700" strokeWidth="1" />
+        <ellipse cx="20" cy="45.5" rx="12" ry="2.2" fill="#3A1700" />
+
+        {/* Clapper (लोलक) - Rapidly Swings continuously when ringing */}
+        <g className={isRinging ? 'animate-clapper-continuous' : ''}>
+          <line x1="20" y1="44" x2="20" y2="50" stroke="#5D2B0D" strokeWidth="2.2" strokeLinecap="round" />
+          <circle cx="20" cy="50" r="2.8" fill="#FFE87C" stroke="#72370F" strokeWidth="0.7" />
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+/**
+ * Traditional Indian Haldi, Kumkum, and Shendur Boxes / Katori (हळद, कुंकू आणि शेंदूर वाटी)
+ * 3-bowl brass organizer container with authentic turmeric yellow, sacred vermilion red,
+ * and bright saffron-orange sindoor powders.
+ */
+export const HaldiKumkumShendurBoxes: React.FC<{
+  size?: number;
+  className?: string;
+  onClick?: () => void;
+}> = ({ size = 68, className = '', onClick }) => {
+  return (
+    <div
+      onClick={onClick}
+      className={`relative inline-flex items-center justify-center cursor-pointer transition-all duration-200 hover:scale-108 active:scale-95 group select-none ${className}`}
+      style={{ width: size, height: size * 0.95 }}
+      title="Sacred Haldi, Kumkum & Shendur (हळद-कुंकू-शेंदूर) - Tap for Tilak"
+    >
+      <svg
+        width={size}
+        height={size * 0.95}
+        viewBox="0 0 90 85"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <linearGradient id="trayBrass" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#72370F" />
+            <stop offset="30%" stopColor="#D4AF37" />
+            <stop offset="55%" stopColor="#FFE87C" />
+            <stop offset="85%" stopColor="#D4AF37" />
+            <stop offset="100%" stopColor="#5D2B0D" />
+          </linearGradient>
+          {/* Haldi Yellow Glow */}
+          <radialGradient id="haldiPowder" cx="45%" cy="40%" r="55%">
+            <stop offset="0%" stopColor="#FFF275" />
+            <stop offset="45%" stopColor="#FFD700" />
+            <stop offset="85%" stopColor="#E6A100" />
+            <stop offset="100%" stopColor="#B37400" />
+          </radialGradient>
+          {/* Kumkum Red Glow */}
+          <radialGradient id="kumkumPowder" cx="45%" cy="40%" r="55%">
+            <stop offset="0%" stopColor="#FF5252" />
+            <stop offset="45%" stopColor="#D50000" />
+            <stop offset="85%" stopColor="#8E0000" />
+            <stop offset="100%" stopColor="#4A0000" />
+          </radialGradient>
+          {/* Shendur Orange Glow */}
+          <radialGradient id="shendurPowder" cx="45%" cy="40%" r="55%">
+            <stop offset="0%" stopColor="#FFAB40" />
+            <stop offset="45%" stopColor="#FF6D00" />
+            <stop offset="85%" stopColor="#D84315" />
+            <stop offset="100%" stopColor="#871C00" />
+          </radialGradient>
+        </defs>
+
+        {/* Brass Trefoil Connecting Base Plate with ornamental scallops */}
+        <path
+          d="M 45,18 C 55,18 64,28 66,38 C 76,40 84,49 83,60 C 82,71 72,78 61,77 C 53,83 37,83 29,77 C 18,78 8,71 7,60 C 6,49 14,40 24,38 C 26,28 35,18 45,18 Z"
+          fill="url(#trayBrass)"
+          stroke="#FFD700"
+          strokeWidth="1.2"
+          filter="drop-shadow(0 2px 4px rgba(0,0,0,0.4))"
+        />
+
+        {/* Center Brass Carrying Handle / Ring */}
+        <circle cx="45" cy="48" r="8" fill="url(#trayBrass)" stroke="#FFD700" strokeWidth="1" />
+        <circle cx="45" cy="48" r="4.5" fill="#3A1700" />
+        <circle cx="45" cy="48" r="2" fill="#FFE87C" />
+
+        {/* =========================================================
+            BOWL 1 (Top Center): SHENDUR (शेंदूर - Orange Sindoor)
+           ========================================================= */}
+        <g>
+          {/* Brass Katori Rim */}
+          <circle cx="45" cy="27" r="16" fill="url(#trayBrass)" stroke="#FFE87C" strokeWidth="1.2" />
+          <circle cx="45" cy="27" r="14" fill="#5D2B0D" />
+          {/* Shendur Powder Mound */}
+          <circle cx="45" cy="27" r="12.5" fill="url(#shendurPowder)" />
+          {/* Powder Granule Highlights */}
+          <circle cx="43" cy="25" r="1" fill="#FFE0B2" opacity="0.8" />
+          <circle cx="47" cy="28" r="0.8" fill="#FFE0B2" opacity="0.8" />
+          <circle cx="45" cy="24" r="0.8" fill="#FFF3E0" opacity="0.9" />
+          {/* Auspicious Inscription / Label */}
+          <text x="45" y="30" fontSize="7" fontWeight="bold" fill="#FFFDD0" textAnchor="middle" opacity="0.9" fontFamily="serif">
+            शेंदूर
+          </text>
+        </g>
+
+        {/* =========================================================
+            BOWL 2 (Bottom Left): HALDI (हळद - Golden Turmeric)
+           ========================================================= */}
+        <g>
+          {/* Brass Katori Rim */}
+          <circle cx="25" cy="58" r="16" fill="url(#trayBrass)" stroke="#FFE87C" strokeWidth="1.2" />
+          <circle cx="25" cy="58" r="14" fill="#5D2B0D" />
+          {/* Haldi Powder Mound */}
+          <circle cx="25" cy="58" r="12.5" fill="url(#haldiPowder)" />
+          {/* Powder Granule Highlights */}
+          <circle cx="23" cy="56" r="1" fill="#FFFDE7" opacity="0.8" />
+          <circle cx="27" cy="59" r="0.8" fill="#FFFDE7" opacity="0.8" />
+          <circle cx="25" cy="55" r="0.8" fill="#FFFFFF" opacity="0.9" />
+          <text x="25" y="61" fontSize="7" fontWeight="bold" fill="#3E2723" textAnchor="middle" opacity="0.9" fontFamily="serif">
+            हळद
+          </text>
+        </g>
+
+        {/* =========================================================
+            BOWL 3 (Bottom Right): KUMKUM (कुंकू - Sacred Vermilion)
+           ========================================================= */}
+        <g>
+          {/* Brass Katori Rim */}
+          <circle cx="65" cy="58" r="16" fill="url(#trayBrass)" stroke="#FFE87C" strokeWidth="1.2" />
+          <circle cx="65" cy="58" r="14" fill="#5D2B0D" />
+          {/* Kumkum Powder Mound */}
+          <circle cx="65" cy="58" r="12.5" fill="url(#kumkumPowder)" />
+          {/* Powder Granule Highlights */}
+          <circle cx="63" cy="56" r="1" fill="#FFCDD2" opacity="0.8" />
+          <circle cx="67" cy="59" r="0.8" fill="#FFCDD2" opacity="0.8" />
+          <circle cx="65" cy="55" r="0.8" fill="#FFFFFF" opacity="0.9" />
+          <text x="65" y="61" fontSize="7" fontWeight="bold" fill="#FFFDD0" textAnchor="middle" opacity="0.9" fontFamily="serif">
+            कुंकू
+          </text>
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+/**
+ * Traditional Marigold Flower (झेंडूचे फूल - Zendu)
+ * Auspicious layered golden-orange flower dear to Lord Ganesha
+ */
+export const MarigoldFlower: React.FC<{
+  size?: number;
+  className?: string;
+  variant?: 'orange' | 'yellow';
+}> = ({ size = 32, className = '', variant = 'orange' }) => {
+  const isYellow = variant === 'yellow';
+  const c1 = isYellow ? '#FFF59D' : '#FFE082';
+  const c2 = isYellow ? '#FDD835' : '#FF9800';
+  const c3 = isYellow ? '#F57F17' : '#E65100';
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 60 60"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`select-none ${className}`}
+      aria-label="Marigold Flower"
+    >
+      <defs>
+        <radialGradient id={`marigoldGrad-${variant}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={c1} />
+          <stop offset="50%" stopColor={c2} />
+          <stop offset="100%" stopColor={c3} />
+        </radialGradient>
+      </defs>
+
+      {/* Outer Ruffled Petals Layer */}
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+        <path
+          key={`outer-${deg}`}
+          d="M 30,30 Q 30,6 23,10 Q 30,2 37,10 Q 30,6 30,30 Z"
+          fill={`url(#marigoldGrad-${variant})`}
+          stroke={c3}
+          strokeWidth="0.4"
+          transform={`rotate(${deg} 30 30)`}
+        />
+      ))}
+
+      {/* Middle Ruffled Petals Layer */}
+      {[15, 45, 75, 105, 135, 165, 195, 225, 255, 285, 315, 345].map((deg) => (
+        <path
+          key={`mid-${deg}`}
+          d="M 30,30 Q 30,12 25,15 Q 30,9 35,15 Q 30,12 30,30 Z"
+          fill={`url(#marigoldGrad-${variant})`}
+          transform={`rotate(${deg} 30 30)`}
+        />
+      ))}
+
+      {/* Inner Dense Petals Crown */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map((deg) => (
+        <path
+          key={`in-${deg}`}
+          d="M 30,30 Q 30,18 27,20 Q 30,16 33,20 Q 30,18 30,30 Z"
+          fill={c1}
+          transform={`rotate(${deg} 30 30)`}
+        />
+      ))}
+
+      {/* Center Pistil Core */}
+      <circle cx="30" cy="30" r="5" fill={c3} />
+      <circle cx="30" cy="30" r="2.5" fill="#FFE082" />
+    </svg>
+  );
+};
+

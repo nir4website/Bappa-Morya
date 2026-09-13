@@ -99,6 +99,48 @@
   }
 }
 
+/* Fast Continuous Ringing of Handheld House Puja Ghanti (घरगुती पूजा घंटी अखंड नाद) */
+@keyframes bellContinuousRing {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(12deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-12deg);
+  }
+}
+
+@keyframes clapperContinuousSwing {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(24deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-24deg);
+  }
+}
+
+@keyframes soundWavePulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
 @keyframes slowFloat {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
@@ -186,6 +228,54 @@
   }
 }
 
+@keyframes hibiscusShowerFall {
+  0% {
+    transform: translateY(-80px) translateX(0px) rotate(0deg) scale(0.7);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(12vh) translateX(14px) rotate(45deg) scale(1);
+  }
+  38% {
+    transform: translateY(38vh) translateX(-22px) rotate(130deg) scale(1.06);
+  }
+  68% {
+    transform: translateY(70vh) translateX(18px) rotate(240deg) scale(0.96);
+  }
+  88% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(112vh) translateX(-10px) rotate(360deg) scale(1.02);
+    opacity: 0;
+  }
+}
+
+@keyframes hibiscusShowerFallRev {
+  0% {
+    transform: translateY(-80px) translateX(0px) rotate(0deg) scale(0.7);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(12vh) translateX(-16px) rotate(-45deg) scale(1);
+  }
+  42% {
+    transform: translateY(42vh) translateX(24px) rotate(-140deg) scale(1.06);
+  }
+  72% {
+    transform: translateY(74vh) translateX(-18px) rotate(-250deg) scale(0.95);
+  }
+  88% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(112vh) translateX(12px) rotate(-360deg) scale(1.02);
+    opacity: 0;
+  }
+}
+
 .animate-flame {
   animation: flameFlicker 2.4s ease-in-out infinite alternate;
   transform-origin: bottom center;
@@ -194,6 +284,21 @@
 .animate-bell-gentle {
   animation: bellSwing 4s ease-in-out infinite;
   transform-origin: top center;
+}
+
+.animate-bell-continuous {
+  animation: bellContinuousRing 0.165s ease-in-out infinite;
+  transform-origin: 20px 4px;
+}
+
+.animate-clapper-continuous {
+  animation: clapperContinuousSwing 0.165s ease-in-out infinite;
+  transform-origin: 20px 44px;
+}
+
+.animate-soundwave {
+  animation: soundWavePulse 0.6s ease-out infinite;
+  transform-origin: center center;
 }
 
 .animate-slow-float {
@@ -227,6 +332,14 @@
 
 .animate-flower-shower {
   animation: flowerDrop 4.5s ease-in-out forwards;
+}
+
+.animate-hibiscus-shower {
+  animation: hibiscusShowerFall 4.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-hibiscus-shower-rev {
+  animation: hibiscusShowerFallRev 4.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 .aarti-plate-glow {

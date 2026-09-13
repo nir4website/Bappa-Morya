@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Copy, Check, Play, Pause, Download, Sparkles, Heart } from 'lucide-react';
+import { Copy, Check, Play, Pause, Sparkles, Heart } from 'lucide-react';
 import { AARTIS_DATA } from '../data/aartisData.ts';
 import { AartiItem } from '../types.ts';
 import { playTempleBell, playShankha } from '../utils/audioSynth.ts';
+import { triggerRedHibiscusShower } from '../utils/flowerShower.ts';
 import { RedHibiscus } from './FestiveIcons.tsx';
 
 interface DevotionalPrayersProps {
@@ -21,7 +22,6 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
   onShowToast
 }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [flowerShowerActive, setFlowerShowerActive] = useState<boolean>(false);
 
   const ghalinLotangan = AARTIS_DATA.find((a) => a.id === 'ghalin-lotangan')!;
   const mantrapushpanjali = AARTIS_DATA.find((a) => a.id === 'mantrapushpanjali')!;
@@ -34,42 +34,14 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
     setTimeout(() => setCopiedId(null), 2500);
   };
 
-  const handleDownload = (item: AartiItem) => {
-    const textContent = `${item.title}\n${item.subTitle}\n\n${item.lyrics.join('\n')}\n\nभावार्थ:\n${item.meaning || ''}\n\n॥ गणपती बाप्पा मोरया, मंगलमूर्ती मोरया ॥\n`;
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${item.id}-marathi.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    onShowToast(`📥 Downloaded ${item.title} text file!`);
-  };
-
   const handleFlowerShower = () => {
-    setFlowerShowerActive(true);
     playShankha(3.0, 0.7);
-    playTempleBell(2300, 0.85);
-    onShowToast('🌺 ॐ मंत्रपुष्पांजली समर्पयामि! Offered sacred flower shower at Bappa\'s feet!');
-    setTimeout(() => setFlowerShowerActive(false), 3800);
+    triggerRedHibiscusShower(36);
+    onShowToast('🌺 ॐ मंत्रपुष्पांजली समर्पयामि! Offered sacred Red Hibiscus flower shower at Bappa\'s lotus feet!');
   };
 
   return (
     <section id="mantra" className="py-16 sm:py-20 bg-gradient-to-b from-[#E35D25] via-[#C94D18] to-[#E35D25] relative border-t-2 border-b-2 border-[#D4AF37]">
-      
-      {/* Dynamic Red Hibiscus Flower Shower Overlay */}
-      {flowerShowerActive && (
-        <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden" aria-hidden="true">
-          <div className="absolute top-10 left-[15%] animate-flower-shower"><RedHibiscus size={36} /></div>
-          <div className="absolute top-14 left-[35%] animate-flower-shower" style={{ animationDelay: '0.2s' }}><RedHibiscus size={32} /></div>
-          <div className="absolute top-8 left-[55%] animate-flower-shower" style={{ animationDelay: '0.4s' }}><RedHibiscus size={40} /></div>
-          <div className="absolute top-16 left-[75%] animate-flower-shower" style={{ animationDelay: '0.1s' }}><RedHibiscus size={30} /></div>
-          <div className="absolute top-6 left-[88%] animate-flower-shower" style={{ animationDelay: '0.3s' }}><RedHibiscus size={34} /></div>
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header in English */}
@@ -124,7 +96,7 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
                     ? 'bg-[#FFD700] text-[#8B4513] border-white shadow-[0_0_15px_#FFD700]'
                     : 'bg-[#5D2B0D] text-[#FFD700] border-[#D4AF37] hover:bg-[#72370F]'
                 }`}
-                title="Listen to Ghalin Lotangan"
+                title="Play Ghalin Lotangan"
               >
                 {currentPlayingId === ghalinLotangan.id && isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               </button>
@@ -154,14 +126,6 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
                 >
                   {copiedId === ghalinLotangan.id ? <Check className="w-4 h-4 text-green-300" /> : <Copy className="w-4 h-4" />}
                   <span>{copiedId === ghalinLotangan.id ? 'Copied!' : 'Copy Text'}</span>
-                </button>
-
-                <button
-                  onClick={() => handleDownload(ghalinLotangan)}
-                  className="px-3.5 py-2 rounded-xl bg-[#72370F] hover:bg-[#5D2B0D] text-[#FFFDD0] text-xs sm:text-sm font-semibold border border-[#D4AF37]/50 flex items-center gap-1.5 active:scale-95 cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-[#FFD700]" />
-                  <span>Download Text</span>
                 </button>
               </div>
 
@@ -209,7 +173,7 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
                     ? 'bg-[#FFD700] text-[#8B4513] border-white shadow-[0_0_15px_#FFD700]'
                     : 'bg-[#5D2B0D] text-[#FFD700] border-[#D4AF37] hover:bg-[#72370F]'
                 }`}
-                title="Listen to Mantrapushpanjali"
+                title="Play Mantrapushpanjali"
               >
                 {currentPlayingId === mantrapushpanjali.id && isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               </button>
@@ -239,14 +203,6 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
                 >
                   {copiedId === mantrapushpanjali.id ? <Check className="w-4 h-4 text-green-300" /> : <Copy className="w-4 h-4" />}
                   <span>{copiedId === mantrapushpanjali.id ? 'Copied!' : 'Copy Text'}</span>
-                </button>
-
-                <button
-                  onClick={() => handleDownload(mantrapushpanjali)}
-                  className="px-3.5 py-2 rounded-xl bg-[#72370F] hover:bg-[#5D2B0D] text-[#FFFDD0] text-xs sm:text-sm font-semibold border border-[#D4AF37]/50 flex items-center gap-1.5 active:scale-95 cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-[#FFD700]" />
-                  <span>Download Text</span>
                 </button>
               </div>
 

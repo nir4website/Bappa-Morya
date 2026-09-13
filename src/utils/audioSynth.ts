@@ -1,4 +1,4 @@
-// Web Audio API Synthesizer for Authentic Handheld Pooja Ghanti, Temple Sounds and Aarti Melodies
+// Web Audio API Synthesizer for Authentic Handheld Pooja Ghanti, Maharashtrian Bhajan Brass Taal (टाळ), Temple Sounds and Aarti Melodies
 
 let audioCtx: AudioContext | null = null;
 
@@ -14,104 +14,276 @@ function getAudioContext(): AudioContext {
 }
 
 /**
- * Play Traditional Household Pooja Ghanti (घरगुती पितळी पूजा घंटी - ३ वेळा शांत व गोड नाद)
- * Recreates the authentic, soft, and melodious three-stroke ringing of a handheld brass bell
- * used in Indian household devghar/mandir during daily morning & evening puja.
- * Three gentle strikes (टण... टण... टणऽऽऽ) with mellow clapper touches and a peaceful, sweet singing resonance (झंकार).
+ * Play Authentic Brass Bell / Taal - Single "Tong" Stroke (एकल खणखणीत 'टण...' नाद)
+ * As requested: Exactly ONE single "tong" strike with immediate crisp brass clapper impact
+ * and a serene, lingering singing resonance (झंकार).
  */
-export function playTempleBell(frequency: number = 784, volume: number = 0.7) {
-  playGhantinaad(frequency, volume);
-}
-
-export function playHandheldPoojaBell(baseFreq: number = 784, volume: number = 0.7) {
-  playGhantinaad(baseFreq, volume);
-}
-
-export function playTraditionalTempleBell(pitchFreq: number = 784, volume: number = 0.7) {
-  playGhantinaad(pitchFreq, volume);
-}
-
-export function playGhantinaad(pitchFreq: number = 784, volume: number = 0.7) {
+export function playBhajanTaal(volume: number = 0.85, _rhythmicPattern: boolean = false) {
   try {
     const ctx = getAudioContext();
     const startTime = ctx.currentTime;
+    const safeVolume = Math.min(Math.max(volume, 0.1), 1.0);
 
-    // Soothing, lower G5 tone (~784 Hz), deeply peaceful and melodious for home puja
-    let fundamental = 784;
-    if (pitchFreq && pitchFreq >= 650 && pitchFreq <= 950) {
-      fundamental = pitchFreq;
-    }
-
-    const safeVolume = Math.min(Math.max(volume, 0.1), 0.9);
-
-    // Warm, soft acoustic filtering to make the tone velvety, mellow, and free of any sharpness
+    // Master bus with crisp, luminous brass EQ shaping
     const masterGain = ctx.createGain();
-    const warmMellowFilter = ctx.createBiquadFilter();
-    warmMellowFilter.type = 'lowpass';
-    warmMellowFilter.frequency.setValueAtTime(2900, startTime); // Velvet smooth brass cutoff
-    warmMellowFilter.Q.setValueAtTime(0.5, startTime);
+    const presenceFilter = ctx.createBiquadFilter();
+    presenceFilter.type = 'peaking';
+    presenceFilter.frequency.setValueAtTime(2600, startTime);
+    presenceFilter.gain.setValueAtTime(3.0, startTime);
+    presenceFilter.Q.setValueAtTime(1.0, startTime);
 
-    masterGain.connect(warmMellowFilter);
-    warmMellowFilter.connect(ctx.destination);
+    masterGain.connect(presenceFilter);
+    presenceFilter.connect(ctx.destination);
 
-    // Household Pooja Ghanti: 3 gentle, melodious rings (टण... टण... टणऽऽऽ)
-    // 1st: gentle stroke
-    // 2nd: warm stroke slightly developing
-    // 3rd: full peaceful strike with prolonged singing resonance (झंकार) lingering in the quiet home
-    const strikes = [
-      { delay: 0.00, velocity: 0.65, ringDecay: 1.40, pitchMod: 0.997 },
-      { delay: 0.38, velocity: 0.75, ringDecay: 1.60, pitchMod: 1.003 },
-      { delay: 0.80, velocity: 0.92, ringDecay: 4.80, pitchMod: 1.000 } // Sweet, peaceful lingering resonance
+    // Single "Tong" Strike only:
+    const strike = {
+      velocity: 1.00,
+      decay: 3.40 // Peaceful, lingering singing resonance
+    };
+
+    // Authentic resonant brass bell / taal fundamental (~1175 Hz / D6)
+    const baseFundamental = 1174.66;
+    const strikeVol = safeVolume * strike.velocity;
+
+    // =========================================================================
+    // 1. Physical Impact: Clean Brass "Tong" Attack Transient (खणखणीत टण आघात)
+    // =========================================================================
+    const clickOsc = ctx.createOscillator();
+    const clickGain = ctx.createGain();
+    clickOsc.type = 'triangle';
+    clickOsc.frequency.setValueAtTime(2800, startTime);
+    clickOsc.frequency.exponentialRampToValueAtTime(1175, startTime + 0.015);
+
+    clickGain.gain.setValueAtTime(0.0001, startTime);
+    clickGain.gain.linearRampToValueAtTime(0.24 * strikeVol, startTime + 0.001);
+    clickGain.gain.exponentialRampToValueAtTime(0.00001, startTime + 0.022);
+
+    clickOsc.connect(clickGain);
+    clickGain.connect(masterGain);
+    clickOsc.start(startTime);
+    clickOsc.stop(startTime + 0.03);
+
+    // Micro noise burst for authentic brass rim contact
+    const bufferSize = Math.floor(ctx.sampleRate * 0.02);
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+    }
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = noiseBuffer;
+
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'bandpass';
+    noiseFilter.frequency.setValueAtTime(2400, startTime);
+    noiseFilter.Q.setValueAtTime(3.0, startTime);
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.14 * strikeVol, startTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.02);
+
+    noiseSrc.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+    noiseSrc.start(startTime);
+
+    // =========================================================================
+    // 2. Pure Consonant Brass Bell Harmonics (एकच गोड, शांत, संथ झंकार)
+    // =========================================================================
+    const modalPartials = [
+      // Deep soothing hum undertone (0.50x)
+      { ratio: 0.50, gain: 0.35, decayMult: 3.2, detune: 0 },
+      // Primary Strike Fundamental (1.00x) - Twin detuned waves for subtle natural shimmer
+      { ratio: 1.00, gain: 0.90, decayMult: strike.decay, detune: -1.2 },
+      { ratio: 1.00, gain: 0.85, decayMult: strike.decay * 0.98, detune: +1.5 },
+      // Minor third tierce (1.19x) - classic brass bell characteristic
+      { ratio: 1.19, gain: 0.42, decayMult: strike.decay * 0.80, detune: 0.5 },
+      // Perfect fifth (1.50x) - sacred sweetness
+      { ratio: 1.50, gain: 0.48, decayMult: strike.decay * 0.85, detune: -0.8 },
+      // Super-octave (2.00x) - luminous clarity
+      { ratio: 2.00, gain: 0.28, decayMult: strike.decay * 0.65, detune: 0.4 },
+      // High brass shimmer mode (2.76x)
+      { ratio: 2.76, gain: 0.16, decayMult: strike.decay * 0.45, detune: 0 }
     ];
 
-    strikes.forEach((strike, index) => {
-      const strikeTime = startTime + strike.delay;
-      const strikeFund = fundamental * strike.pitchMod;
-      const isFinal = index === strikes.length - 1;
+    modalPartials.forEach((p) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-      // 1. Soft brass clapper contact touch (हलका लंबक स्पर्श - completely soft, rounded & non-piercing)
-      const clapperOsc = ctx.createOscillator();
-      const clapperFilter = ctx.createBiquadFilter();
-      const clapperGain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(baseFundamental * p.ratio, startTime);
+      if (p.detune) {
+        osc.detune.setValueAtTime(p.detune * 4, startTime);
+      }
 
-      clapperOsc.type = 'sine'; // Pure sine for smooth, soft, round tap
-      clapperOsc.frequency.setValueAtTime(strikeFund * 1.5, strikeTime);
-      clapperOsc.frequency.exponentialRampToValueAtTime(strikeFund * 1.05, strikeTime + 0.035);
+      const peakGain = p.gain * strikeVol * 0.36;
+      const dur = p.decayMult;
 
-      clapperFilter.type = 'bandpass';
-      clapperFilter.frequency.setValueAtTime(strikeFund * 1.25, strikeTime);
-      clapperFilter.Q.setValueAtTime(1.5, strikeTime);
+      // Clean, soft 3ms rise avoids clicks while giving immediate crisp "tong" attack
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.linearRampToValueAtTime(peakGain, startTime + 0.003);
+      gain.gain.exponentialRampToValueAtTime(0.00001, startTime + dur);
 
-      clapperGain.gain.setValueAtTime(0.0001, strikeTime);
-      clapperGain.gain.linearRampToValueAtTime(0.08 * safeVolume * strike.velocity, strikeTime + 0.004);
-      clapperGain.gain.exponentialRampToValueAtTime(0.00001, strikeTime + 0.04);
+      osc.connect(gain);
+      gain.connect(masterGain);
 
-      clapperOsc.connect(clapperFilter);
-      clapperFilter.connect(clapperGain);
-      clapperGain.connect(masterGain);
-      clapperOsc.start(strikeTime);
-      clapperOsc.stop(strikeTime + 0.05);
+      osc.start(startTime);
+      osc.stop(startTime + dur + 0.05);
+    });
 
-      // 2. Sweet Devotional Ghanti Harmonics (घरगुती देवघरातील अत्यंत गोड, शांत संथ झंकार)
-      // Highly melodious, consonant harmonic structure of an authentic solid brass home puja bell:
-      // - Sub-octave hum tone (0.50x): creates the tranquil, reverent warmth of a pooja corner
-      // - Twin fundamental tones (1.00x) with micro-detuning (0.8 Hz): delicate, slow undulating singing wave
-      // - Minor third tierce (1.19x): gives pure authentic bell character without sharpness
-      // - Pure consonant fifth (1.50x): infuses deep, sweet, comforting musicality
-      // - Gentle octave (2.00x): soft, warm silvery chime, kept at low volume for sweetness
+    // =========================================================================
+    // 3. High Silvery Air Shimmer (हवेशीर झंकार)
+    // =========================================================================
+    const shimmerOsc = ctx.createOscillator();
+    const shimmerFilter = ctx.createBiquadFilter();
+    const shimmerGain = ctx.createGain();
+
+    shimmerOsc.type = 'triangle';
+    shimmerOsc.frequency.setValueAtTime(baseFundamental * 2.0, startTime);
+
+    shimmerFilter.type = 'highpass';
+    shimmerFilter.frequency.setValueAtTime(3600, startTime);
+
+    shimmerGain.gain.setValueAtTime(0.0001, startTime);
+    shimmerGain.gain.linearRampToValueAtTime(0.035 * strikeVol, startTime + 0.003);
+    shimmerGain.gain.exponentialRampToValueAtTime(0.00001, startTime + 1.2);
+
+    shimmerOsc.connect(shimmerFilter);
+    shimmerFilter.connect(shimmerGain);
+    shimmerGain.connect(masterGain);
+
+    shimmerOsc.start(startTime);
+    shimmerOsc.stop(startTime + 1.25);
+
+  } catch (err) {
+    console.warn('Bell audio could not be played:', err);
+  }
+}
+
+/**
+ * State tracking for Continuous House Puja Bell (घरगुती पूजा घंटी)
+ */
+let activeGhantiGain: GainNode | null = null;
+let activeGhantiOscillators: OscillatorNode[] = [];
+let activeGhantiTimer: ReturnType<typeof setTimeout> | null = null;
+
+/**
+ * Stop active continuous house puja bell ringing smoothly
+ */
+export function stopHousePujaGhanti() {
+  if (activeGhantiTimer) {
+    clearTimeout(activeGhantiTimer);
+    activeGhantiTimer = null;
+  }
+  if (activeGhantiGain && audioCtx) {
+    try {
+      const now = audioCtx.currentTime;
+      activeGhantiGain.gain.cancelScheduledValues(now);
+      activeGhantiGain.gain.setValueAtTime(activeGhantiGain.gain.value, now);
+      activeGhantiGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      setTimeout(() => {
+        activeGhantiOscillators.forEach(osc => {
+          try { osc.stop(); } catch {}
+        });
+        activeGhantiOscillators = [];
+        activeGhantiGain = null;
+      }, 400);
+    } catch {
+      activeGhantiGain = null;
+    }
+  }
+}
+
+/**
+ * Play Authentic Continuous House Puja Bell Sound "Ghanti" (घरगुती पूजा घंटी अखंड नाद)
+ * Recreates the lively, continuous hand-ringing of a domestic brass puja ghanti
+ * during daily aartis and rituals:
+ * - Rapid alternating strikes (~6 strikes per second, oscillating left and right).
+ * - Authentic domestic brass bell acoustic harmonics (fundamental ~1660 Hz).
+ * - Overlapping singing resonance forming a continuous shimmering sound.
+ * - Prolonged sweet trailing ring when the ringing slows down.
+ */
+export function playHousePujaGhantiContinuous(durationSeconds: number = 3.5, volume: number = 0.85) {
+  try {
+    stopHousePujaGhanti();
+    const ctx = getAudioContext();
+    const startTime = ctx.currentTime;
+    const safeVolume = Math.min(Math.max(volume, 0.1), 1.0);
+
+    const masterGain = ctx.createGain();
+    
+    // High-pass filter to ensure clear, silvery brass tone without mud
+    const hpFilter = ctx.createBiquadFilter();
+    hpFilter.type = 'highpass';
+    hpFilter.frequency.setValueAtTime(450, startTime);
+
+    // Presence peaking filter for that bright, sacred Indian brass ghanti presence
+    const presenceFilter = ctx.createBiquadFilter();
+    presenceFilter.type = 'peaking';
+    presenceFilter.frequency.setValueAtTime(3200, startTime);
+    presenceFilter.gain.setValueAtTime(4.5, startTime);
+    presenceFilter.Q.setValueAtTime(1.2, startTime);
+
+    masterGain.connect(hpFilter);
+    hpFilter.connect(presenceFilter);
+    presenceFilter.connect(ctx.destination);
+
+    activeGhantiGain = masterGain;
+    activeGhantiOscillators = [];
+
+    // Master volume envelope: instant rise, sustained ringing, and a sweet natural trailing decay
+    masterGain.gain.setValueAtTime(0.0001, startTime);
+    masterGain.gain.linearRampToValueAtTime(safeVolume, startTime + 0.03);
+    masterGain.gain.setValueAtTime(safeVolume, startTime + durationSeconds);
+    masterGain.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSeconds + 2.0);
+
+    // Domestic handheld brass ghanti base fundamental (~1660 Hz / G#6)
+    const baseFreq = 1661.2;
+    // Rhythmic cadence of human hand ringing: ~0.165s between strikes (approx 6 strikes/sec)
+    const strikeInterval = 0.165;
+    const totalStrikes = Math.max(Math.floor(durationSeconds / strikeInterval), 8);
+
+    for (let i = 0; i < totalStrikes; i++) {
+      const strikeTime = startTime + i * strikeInterval;
+      // Slight natural human oscillation micro-variance
+      const jitter = (Math.random() - 0.5) * 0.01;
+      const t = Math.max(startTime, strikeTime + jitter);
+
+      // Alternating left/right clapper strike inside the bell cup
+      const isLeft = i % 2 === 0;
+      const strikeFreq = isLeft ? baseFreq : baseFreq * 1.018; // ~30 cents micro-shift between sides
+      const strikeVel = isLeft ? 0.96 : 0.88;
+
+      // 1. Crisp brass clapper impact transient
+      const clickOsc = ctx.createOscillator();
+      const clickGain = ctx.createGain();
+      clickOsc.type = 'triangle';
+      clickOsc.frequency.setValueAtTime(3600, t);
+      clickOsc.frequency.exponentialRampToValueAtTime(1660, t + 0.012);
+
+      clickGain.gain.setValueAtTime(0.0001, t);
+      clickGain.gain.linearRampToValueAtTime(0.18 * strikeVel, t + 0.001);
+      clickGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.018);
+
+      clickOsc.connect(clickGain);
+      clickGain.connect(masterGain);
+      clickOsc.start(t);
+      clickOsc.stop(t + 0.025);
+      activeGhantiOscillators.push(clickOsc);
+
+      // 2. Harmonic modal partials of the domestic brass bell cup
+      // Decay of 0.42s overlaps continuously across strokes!
+      // The final stroke rings out for 2.2s for a peaceful spiritual resolution
+      const isLast = i === totalStrikes - 1;
+      const decay = isLast ? 2.2 : 0.42;
+
       const partials = [
-        // Peaceful foundation hum
-        { ratio: 0.50, gain: 0.38, decayMult: isFinal ? 4.2 : 1.1, detune: 0 },
-        // Primary strike note (A)
-        { ratio: 1.00, gain: 0.88, decayMult: strike.ringDecay, detune: -0.9 },
-        // Twin strike note (B) - creates sweet, gentle slow beating
-        { ratio: 1.00, gain: 0.82, decayMult: strike.ringDecay * 0.95, detune: +1.1 },
-        // Minor third tierce (authentic brass character)
-        { ratio: 1.19, gain: 0.38, decayMult: strike.ringDecay * 0.75, detune: 0.3 },
-        // Pure fifth (sacred sweetness and soothing melody)
-        { ratio: 1.50, gain: 0.42, decayMult: strike.ringDecay * 0.80, detune: -0.4 },
-        // Super-octave (very soft, delicate presence)
-        { ratio: 2.00, gain: 0.16, decayMult: isFinal ? 2.0 : 0.6, detune: 0.5 }
+        { ratio: 0.50, gain: 0.28 }, // hum tone
+        { ratio: 1.00, gain: 0.90 }, // fundamental
+        { ratio: 1.19, gain: 0.42 }, // tierce
+        { ratio: 1.50, gain: 0.48 }, // quint
+        { ratio: 2.00, gain: 0.32 }, // nominal
+        { ratio: 2.76, gain: 0.20 }, // silvery shimmer
       ];
 
       partials.forEach(p => {
@@ -119,30 +291,59 @@ export function playGhantinaad(pitchFreq: number = 784, volume: number = 0.7) {
         const gain = ctx.createGain();
 
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(strikeFund * p.ratio, strikeTime);
-        if (p.detune) {
-          osc.detune.setValueAtTime(p.detune * 4, strikeTime);
-        }
+        osc.frequency.setValueAtTime(strikeFreq * p.ratio, t);
 
-        const peakGain = p.gain * safeVolume * strike.velocity * 0.38;
-        const dur = p.decayMult;
-
-        // Soft 6ms linear rise eliminates any click or harsh transient
-        gain.gain.setValueAtTime(0.0001, strikeTime);
-        gain.gain.linearRampToValueAtTime(peakGain, strikeTime + 0.006);
-        gain.gain.exponentialRampToValueAtTime(0.00001, strikeTime + dur);
+        const peak = p.gain * strikeVel * 0.26;
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.linearRampToValueAtTime(peak, t + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.00001, t + decay);
 
         osc.connect(gain);
         gain.connect(masterGain);
 
-        osc.start(strikeTime);
-        osc.stop(strikeTime + dur + 0.06);
+        osc.start(t);
+        osc.stop(t + decay + 0.05);
+        activeGhantiOscillators.push(osc);
       });
-    });
+    }
+
+    activeGhantiTimer = setTimeout(() => {
+      activeGhantiGain = null;
+      activeGhantiOscillators = [];
+    }, (durationSeconds + 2.2) * 1000);
 
   } catch (err) {
-    console.warn('Ghantinaad audio could not be played:', err);
+    console.warn('Continuous house puja ghanti audio could not be played:', err);
   }
+}
+
+/**
+ * Play Single Brass Taal / Bell Stroke (एकल 'टण...' आघात)
+ */
+export function playTaalSingleStroke(volume: number = 0.85) {
+  playBhajanTaal(volume, false);
+}
+
+/**
+ * Universal Bell Sound Mappings
+ */
+export function playTempleBell(frequency: number = 784, volume: number = 0.85) {
+  playBhajanTaal(volume, false);
+}
+
+/**
+ * House Puja Bell Sound "Ghanti" - Continuous ringing
+ */
+export function playHandheldPoojaBell(durationSeconds: number = 3.5, volume: number = 0.85) {
+  playHousePujaGhantiContinuous(durationSeconds, volume);
+}
+
+export function playTraditionalTempleBell(pitchFreq: number = 784, volume: number = 0.85) {
+  playBhajanTaal(volume, false);
+}
+
+export function playGhantinaad(durationSeconds: number = 3.5, volume: number = 0.85) {
+  playHousePujaGhantiContinuous(durationSeconds, volume);
 }
 
 /**
@@ -192,34 +393,8 @@ export function playShankha(duration: number = 3.5, volume: number = 0.6) {
 /**
  * Play Kartal / Taal Chime (झांज / टाळ)
  */
-export function playKartal(volume: number = 0.4) {
-  try {
-    const ctx = getAudioContext();
-    const now = ctx.currentTime;
-
-    const highPass = ctx.createBiquadFilter();
-    highPass.type = 'highpass';
-    highPass.frequency.setValueAtTime(4500, now);
-
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(volume * 0.4, now);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-
-    // Metallic shimmer
-    [2400, 3600, 5200, 7800].forEach(f => {
-      const osc = ctx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(f, now);
-      osc.connect(highPass);
-      osc.start(now);
-      osc.stop(now + 0.35);
-    });
-
-    highPass.connect(gain);
-    gain.connect(ctx.destination);
-  } catch (err) {
-    console.warn('Kartal audio error:', err);
-  }
+export function playKartal(volume: number = 0.5) {
+  playTaalSingleStroke(volume);
 }
 
 /**

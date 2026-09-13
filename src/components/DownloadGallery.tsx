@@ -1,54 +1,15 @@
 import React, { useState } from 'react';
-import { Download, Sparkles, Image as ImageIcon, FileText, MapPin, ExternalLink, Folder } from 'lucide-react';
+import { Eye, Sparkles, Image as ImageIcon, MapPin, ExternalLink, Folder } from 'lucide-react';
 import { FAMOUS_TEMPLES } from '../data/templesData.ts';
 import { ASHTAVINAYAK_TEMPLES } from '../data/ashtavinayakData.ts';
-import { AARTIS_DATA } from '../data/aartisData.ts';
 
 interface DownloadGalleryProps {
   onOpenLightbox: (imageUrl: string, title: string, subtitle: string, googleMapsUrl?: string, fileName?: string) => void;
   onShowToast: (msg: string) => void;
 }
 
-export const DownloadGallery: React.FC<DownloadGalleryProps> = ({ onOpenLightbox, onShowToast }) => {
+export const DownloadGallery: React.FC<DownloadGalleryProps> = ({ onOpenLightbox }) => {
   const [activeTab, setActiveTab] = useState<'ashtavinayak' | 'famous'>('ashtavinayak');
-
-  const handleDownloadAllAartis = () => {
-    let combinedContent = `॥ श्री गणेशाय नम: ॥\n\n=========================================\nBAPPA MORYA — संपूर्ण मराठी आरती संग्रह व मंत्र\n=========================================\n\n`;
-    
-    AARTIS_DATA.forEach((a, i) => {
-      combinedContent += `[${i + 1}] ${a.title}\n(${a.subTitle})\n\n${a.lyrics.join('\n')}\n\nभावार्थ: ${a.meaning || ''}\n\n-----------------------------------------\n\n`;
-    });
-
-    combinedContent += `॥ गणपती बाप्पा मोरया, मंगलमूर्ती मोरया ॥\n॥ शुभ गणेशोत्सव ॥`;
-
-    const blob = new Blob([combinedContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'bappa-morya-complete-marathi-aartis.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    onShowToast('📥 Downloaded Complete Marathi Aarti Sangrah file!');
-  };
-
-  const handleDownloadImage = (imgUrl: string, filename: string, title: string) => {
-    try {
-      const link = document.createElement('a');
-      link.href = imgUrl;
-      link.download = filename;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      onShowToast(`📥 Downloaded ${filename}!`);
-    } catch {
-      window.open(imgUrl, '_blank');
-      onShowToast(`📥 Opened ${filename}!`);
-    }
-  };
 
   return (
     <section id="download-gallery" className="py-16 sm:py-20 bg-gradient-to-b from-[#E35D25] via-[#C94D18] to-[#E35D25] border-t-2 border-[#D4AF37] relative">
@@ -57,43 +18,19 @@ export const DownloadGallery: React.FC<DownloadGalleryProps> = ({ onOpenLightbox
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#8B4513] border border-[#D4AF37] text-xs sm:text-sm font-semibold text-[#FFD700] shadow-md">
-            <Download className="w-4 h-4 text-[#FFD700]" />
-            <span>Devotional Downloads & Locations Hub</span>
+            <ImageIcon className="w-4 h-4 text-[#FFD700]" />
+            <span>Sacred Wallpaper & Temple Darshan Gallery</span>
           </div>
 
           <h2 className="font-festive text-3xl sm:text-4xl lg:text-5xl font-bold text-[#FFFDD0] tracking-tight gold-glow">
-            Ganesha Wallpapers & Aarti Downloads
+            Ganesha Wallpapers & Sacred Shrines
           </h2>
 
           <p className="text-base sm:text-lg text-[#FFFDD0]/95">
-            Download high-definition Lord Ganesha wallpapers from the Astavinayak folder and the complete Marathi Aarti book for your poojas and mobile devices.
+            Explore high-definition Lord Ganesha wallpapers from the sacred Astavinayak yatra and renowned Maharashtra temples with verified Google Maps navigation.
           </p>
 
           <div className="h-0.5 w-28 mx-auto bg-gradient-to-r from-transparent via-[#FFD700] to-transparent mt-2" />
-        </div>
-
-        {/* All-in-One Download Banner */}
-        <div className="mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#8B4513] via-[#72370F] to-[#5D2B0D] border-2 border-[#D4AF37] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FFD700] uppercase tracking-wider">
-              <Sparkles className="w-4 h-4" />
-              <span>Complete Collection</span>
-            </div>
-            <h3 className="font-festive text-2xl sm:text-3xl font-bold text-[#FFFDD0]">
-              Download All Marathi Aartis in One File
-            </h3>
-            <p className="text-xs sm:text-sm text-[#FFFDD0]/90 max-w-xl">
-              Includes Sukhkarta Dukhharta, Durge Durgat Bhari, Lavthavati Vikrala, Ghalin Lotangan, and Vedic Mantrapushpanjali with meanings in one clean text file.
-            </p>
-          </div>
-
-          <button
-            onClick={handleDownloadAllAartis}
-            className="px-6 py-3.5 rounded-2xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] font-extrabold text-base border border-white shadow-[0_0_20px_rgba(255,215,0,0.5)] flex items-center gap-2.5 active:scale-95 transition-all shrink-0 cursor-pointer"
-          >
-            <FileText className="w-5 h-5 text-[#8B4513]" />
-            <span>Download All Aartis (.txt)</span>
-          </button>
         </div>
 
         {/* Wallpaper Tabs & Gallery */}
@@ -181,12 +118,12 @@ export const DownloadGallery: React.FC<DownloadGalleryProps> = ({ onOpenLightbox
                       </a>
 
                       <button
-                        onClick={() => handleDownloadImage(temple.image, temple.downloadFilename, temple.deity)}
+                        onClick={() => onOpenLightbox(temple.image, `${temple.order}. ${temple.deity}`, `${temple.location}, ${temple.district}`, temple.googleMapsUrl, temple.folderFileName)}
                         className="flex-1 py-1.5 px-2 rounded-lg bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-[11px] font-bold border border-white flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
-                        title={`Download ${temple.downloadFilename}`}
+                        title={`View Darshan of ${temple.deity}`}
                       >
-                        <Download className="w-3 h-3 text-[#8B4513]" />
-                        <span>Download</span>
+                        <Eye className="w-3 h-3 text-[#8B4513]" />
+                        <span>Darshan</span>
                       </button>
                     </div>
                   </div>
@@ -225,11 +162,12 @@ export const DownloadGallery: React.FC<DownloadGalleryProps> = ({ onOpenLightbox
                     </p>
                     
                     <button
-                      onClick={() => handleDownloadImage(temple.image, temple.downloadFilename, temple.nameEn)}
+                      onClick={() => onOpenLightbox(temple.image, `${temple.nameEn} (${temple.name})`, temple.location)}
                       className="w-full py-1.5 px-2 rounded-lg bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-[11px] font-bold border border-white flex items-center justify-center gap-1 active:scale-95 transition-all cursor-pointer"
+                      title={`View Darshan of ${temple.nameEn}`}
                     >
-                      <Download className="w-3 h-3 text-[#8B4513]" />
-                      <span>Download</span>
+                      <Eye className="w-3 h-3 text-[#8B4513]" />
+                      <span>Darshan</span>
                     </button>
                   </div>
                 </div>

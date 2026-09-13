@@ -1,31 +1,14 @@
 import React from 'react';
-import { Download, Eye, MapPin, Compass, ExternalLink, Folder } from 'lucide-react';
+import { Eye, MapPin, Compass, ExternalLink, Folder } from 'lucide-react';
 import { ASHTAVINAYAK_TEMPLES } from '../data/ashtavinayakData.ts';
 import { AshtavinayakTemple } from '../types.ts';
 
 interface AshtavinayakSectionProps {
   onOpenLightbox: (imageUrl: string, title: string, subtitle: string, googleMapsUrl?: string, fileName?: string) => void;
-  onShowToast: (msg: string) => void;
+  onShowToast?: (msg: string) => void;
 }
 
 export const AshtavinayakSection: React.FC<AshtavinayakSectionProps> = ({ onOpenLightbox, onShowToast }) => {
-  const handleDownload = (temple: AshtavinayakTemple, e: React.MouseEvent) => {
-    e.stopPropagation();
-    try {
-      const link = document.createElement('a');
-      link.href = temple.image;
-      link.download = temple.downloadFilename;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      onShowToast(`📥 Downloaded ${temple.downloadFilename}!`);
-    } catch {
-      window.open(temple.image, '_blank');
-      onShowToast(`📥 Opened ${temple.downloadFilename}!`);
-    }
-  };
-
   return (
     <section id="ashtavinayak" className="py-16 sm:py-20 bg-gradient-to-b from-[#E35D25] via-[#C94D18] to-[#E35D25] border-t-2 border-b-2 border-[#D4AF37] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -116,7 +99,7 @@ export const AshtavinayakSection: React.FC<AshtavinayakSectionProps> = ({ onOpen
                   </div>
                 </div>
 
-                {/* Action Buttons: Google Location & Download */}
+                {/* Action Buttons: Google Location & Full Darshan */}
                 <div className="pt-3 border-t border-[#72370F] flex items-center gap-2">
                   {/* Google Location */}
                   <a
@@ -132,14 +115,14 @@ export const AshtavinayakSection: React.FC<AshtavinayakSectionProps> = ({ onOpen
                     <ExternalLink className="w-3 h-3 text-[#1A73E8] shrink-0" />
                   </a>
 
-                  {/* Download */}
+                  {/* View Full Darshan */}
                   <button
-                    onClick={(e) => handleDownload(temple, e)}
+                    onClick={() => onOpenLightbox(temple.image, `${temple.deity} (${temple.name})`, temple.location, temple.googleMapsUrl, temple.downloadFilename)}
                     className="py-2 px-3 rounded-xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] text-xs font-bold border border-white shadow transition-all flex items-center justify-center gap-1 active:scale-95 cursor-pointer shrink-0"
-                    title={`Download ${temple.downloadFilename}`}
+                    title={`View Darshan of ${temple.deity}`}
                   >
-                    <Download className="w-3.5 h-3.5 text-[#8B4513]" />
-                    <span>Download</span>
+                    <Eye className="w-3.5 h-3.5 text-[#8B4513]" />
+                    <span>Darshan</span>
                   </button>
                 </div>
 
