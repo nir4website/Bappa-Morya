@@ -337,88 +337,85 @@ export const HandheldPoojaBellIcon: React.FC<{
 
 /**
  * Traditional Brass Standing Pooja Bell with Clapper for Thali (ताटातील पितळी पूजा घंटी)
- * With continuous house puja bell ringing animation and soundwave ripples
+ * Styled identical to the main Handheld Pooja Bell with ringing animation & clapper
  */
 export const PoojaBellStanding: React.FC<{
   size?: number;
   isRinging?: boolean;
   className?: string;
-}> = ({ size = 44, isRinging = false, className = '' }) => {
+}> = ({ size = 40, isRinging = false, className = '' }) => {
   return (
     <div
       className={`relative inline-flex items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-110 select-none ${
         isRinging ? 'animate-bell-continuous' : ''
       } ${className}`}
-      style={{ width: size, height: size * 1.3 }}
+      style={{ width: size, height: size * 1.05, transformOrigin: 'top center' }}
       title="घरगुती पूजा घंटी (House Puja Bell) - अखंड घंटानाद"
     >
       {/* Radiating Soundwave Ripples when Continuously Ringing */}
       {isRinging && (
         <>
-          <span className="absolute -inset-2 rounded-full border-2 border-[#FFD700]/70 animate-soundwave pointer-events-none" />
-          <span className="absolute -inset-4 rounded-full border border-[#FFE87C]/50 animate-soundwave [animation-delay:0.2s] pointer-events-none" />
+          <span className="absolute -inset-1.5 rounded-full border-2 border-[#FFD700]/70 animate-soundwave pointer-events-none" />
+          <span className="absolute -inset-3.5 rounded-full border border-[#FFE87C]/50 animate-soundwave [animation-delay:0.2s] pointer-events-none" />
         </>
       )}
 
       <svg
         width={size}
-        height={size * 1.3}
-        viewBox="0 0 40 52"
+        height={size * 1.05}
+        viewBox="0 0 32 32"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className={isRinging ? 'drop-shadow-[0_0_12px_rgba(255,215,0,0.9)]' : 'drop-shadow-[0_3px_6px_rgba(0,0,0,0.4)]'}
+        className={isRinging ? 'drop-shadow-[0_0_12px_rgba(255,215,0,0.95)]' : 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)]'}
+        aria-label="Handheld Pooja Ghanti"
       >
         <defs>
-          <linearGradient id="bellBrassStanding" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#72370F" />
-            <stop offset="25%" stopColor="#D4AF37" />
-            <stop offset="50%" stopColor="#FFE87C" />
-            <stop offset="75%" stopColor="#FFD700" />
-            <stop offset="100%" stopColor="#5D2B0D" />
+          <linearGradient id="poojaBrassStanding" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#8B4513" />
+            <stop offset="35%" stopColor="#FFD700" />
+            <stop offset="70%" stopColor="#FFE87C" />
+            <stop offset="100%" stopColor="#72370F" />
           </linearGradient>
-          <radialGradient id="bellDomeLight" cx="40%" cy="30%" r="60%">
-            <stop offset="0%" stopColor="#FFFDD0" stopOpacity="0.9" />
-            <stop offset="60%" stopColor="#FFD700" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#72370F" stopOpacity="0" />
-          </radialGradient>
         </defs>
 
-        {/* Garuda / Nandi Finial at the handle top */}
+        {/* Handle with Garuda/Nandi finial top */}
         <path
-          d="M 20,2 C 17,2 17,7 20,7 C 23,7 23,2 20,2 Z"
-          fill="url(#bellBrassStanding)"
+          d="M 16,3 C 14.5,3 14.5,6 16,6 C 17.5,6 17.5,3 16,3 Z"
+          fill="url(#poojaBrassStanding)"
           stroke="#FFD700"
-          strokeWidth="0.6"
+          strokeWidth="0.5"
         />
-        {/* Handle Stem with Knurled Rings */}
-        <line x1="20" y1="7" x2="20" y2="22" stroke="url(#bellBrassStanding)" strokeWidth="3.5" strokeLinecap="round" />
-        <ellipse cx="20" cy="12" rx="3.5" ry="1.5" fill="#FFD700" stroke="#72370F" strokeWidth="0.4" />
-        <ellipse cx="20" cy="18" rx="4" ry="1.8" fill="#FFD700" stroke="#72370F" strokeWidth="0.4" />
+        <line
+          x1="16"
+          y1="6"
+          x2="16"
+          y2="16"
+          stroke="url(#poojaBrassStanding)"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+        <circle cx="16" cy="11" r="2" fill="#D4AF37" />
 
-        {/* Bell Body Dome */}
+        {/* Bell Cup */}
         <path
-          d="M 14,22 C 14,22 8,33 5,41 C 4,44 7,45 20,45 C 33,45 36,44 35,41 C 32,33 26,22 26,22 Z"
-          fill="url(#bellBrassStanding)"
+          d="M 12,16 C 12,16 9,21 7,26 C 6.5,27 8,28 16,28 C 24,28 25.5,27 25,26 C 23,21 20,16 20,16 Z"
+          fill="url(#poojaBrassStanding)"
           stroke="#FFD700"
-          strokeWidth="1.2"
+          strokeWidth="0.8"
         />
-        <path
-          d="M 14,22 C 14,22 8,33 5,41 C 4,44 7,45 20,45 C 33,45 36,44 35,41 C 32,33 26,22 26,22 Z"
-          fill="url(#bellDomeLight)"
+        <ellipse
+          cx="16"
+          cy="27"
+          rx="8"
+          ry="1.5"
+          fill="url(#poojaBrassStanding)"
+          stroke="#FFD700"
+          strokeWidth="0.5"
         />
 
-        {/* Engraved Bands on Bell */}
-        <path d="M 11,32 Q 20,34 29,32" stroke="#5D2B0D" strokeWidth="0.8" fill="none" />
-        <path d="M 8,38 Q 20,41 32,38" stroke="#FFE87C" strokeWidth="0.8" fill="none" />
-
-        {/* Flanged Bottom Lip */}
-        <ellipse cx="20" cy="45" rx="15" ry="3.5" fill="url(#bellBrassStanding)" stroke="#FFD700" strokeWidth="1" />
-        <ellipse cx="20" cy="45.5" rx="12" ry="2.2" fill="#3A1700" />
-
-        {/* Clapper (लोलक) - Rapidly Swings continuously when ringing */}
-        <g className={isRinging ? 'animate-clapper-continuous' : ''}>
-          <line x1="20" y1="44" x2="20" y2="50" stroke="#5D2B0D" strokeWidth="2.2" strokeLinecap="round" />
-          <circle cx="20" cy="50" r="2.8" fill="#FFE87C" stroke="#72370F" strokeWidth="0.7" />
+        {/* Clapper */}
+        <g className={isRinging ? 'animate-clapper-continuous' : ''} style={{ transformOrigin: '16px 27px' }}>
+          <circle cx="16" cy="29" r="1.5" fill="#FFE87C" stroke="#5D2B0D" strokeWidth="0.5" />
         </g>
       </svg>
     </div>

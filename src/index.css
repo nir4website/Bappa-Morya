@@ -350,6 +350,58 @@
   filter: drop-shadow(0 0 12px rgba(227, 93, 37, 0.8));
 }
 
+/* Sacred Haldi (Yellow) & Kumkum (Vermilion) Powder Puff Animations */
+@keyframes haldiKumkumCloud {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2) translateY(0);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  15% {
+    transform: translate(-50%, -50%) scale(0.95) translateY(-10px);
+    opacity: 0.95;
+    filter: blur(8px);
+  }
+  45% {
+    transform: translate(-50%, -50%) scale(1.45) translateY(-32px);
+    opacity: 0.85;
+    filter: blur(14px);
+  }
+  75% {
+    transform: translate(-50%, -50%) scale(1.8) translateY(-60px);
+    opacity: 0.42;
+    filter: blur(22px);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2.2) translateY(-90px);
+    opacity: 0;
+    filter: blur(32px);
+  }
+}
+
+@keyframes powderParticleFly {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  65% {
+    opacity: 0.92;
+  }
+  100% {
+    transform: translate(var(--p-x, 0px), var(--p-y, -60px)) scale(0.2);
+    opacity: 0;
+  }
+}
+
+.animate-powder-cloud {
+  animation: haldiKumkumCloud 2.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center center;
+}
+
+.animate-powder-particle {
+  animation: powderParticleFly 1.9s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;

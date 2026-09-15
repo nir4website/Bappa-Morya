@@ -1,6 +1,49 @@
 // Web Audio API Synthesizer for Authentic Handheld Pooja Ghanti, Maharashtrian Bhajan Brass Taal (टाळ), Temple Sounds and Aarti Melodies
+import householdGhantiAudioUrl from '../assets/audio/household_puja_ghanti_aarti.mp3';
 
 let audioCtx: AudioContext | null = null;
+let householdGhantiBuffer: AudioBuffer | null = null;
+let isFetchingGhantiBuffer = false;
+let activeGhantiBufferSource: AudioBufferSourceNode | null = null;
+let activeGhantiGain: GainNode | null = null;
+let activeGhantiOscillators: OscillatorNode[] = [];
+let activeGhantiTimer: ReturnType<typeof setTimeout> | null = null;
+let ghantiHtmlAudio: HTMLAudioElement | null = null;
+
+if (typeof window !== 'undefined') {
+  try {
+    ghantiHtmlAudio = new Audio(householdGhantiAudioUrl);
+    ghantiHtmlAudio.preload = 'auto';
+  } catch {}
+
+  const triggerPreload = () => {
+    try {
+      const ctx = getAudioContext();
+      preloadHouseholdGhantiBuffer(ctx).catch(() => {});
+    } catch {}
+    window.removeEventListener('pointerdown', triggerPreload);
+    window.removeEventListener('keydown', triggerPreload);
+  };
+  window.addEventListener('pointerdown', triggerPreload, { once: true });
+  window.addEventListener('keydown', triggerPreload, { once: true });
+}
+
+async function preloadHouseholdGhantiBuffer(ctx: AudioContext): Promise<AudioBuffer | null> {
+  if (householdGhantiBuffer) return householdGhantiBuffer;
+  if (isFetchingGhantiBuffer) return null;
+  isFetchingGhantiBuffer = true;
+  try {
+    const res = await fetch(householdGhantiAudioUrl);
+    const ab = await res.arrayBuffer();
+    householdGhantiBuffer = await ctx.decodeAudioData(ab);
+    return householdGhantiBuffer;
+  } catch (err) {
+    console.warn('Authentic ghanti audio buffer decoding deferred, falling back smoothly:', err);
+    return null;
+  } finally {
+    isFetchingGhantiBuffer = false;
+  }
+}
 
 function getAudioContext(): AudioContext {
   if (!audioCtx) {
@@ -9,6 +52,9 @@ function getAudioContext(): AudioContext {
   }
   if (audioCtx.state === 'suspended') {
     audioCtx.resume();
+  }
+  if (!householdGhantiBuffer && !isFetchingGhantiBuffer) {
+    preloadHouseholdGhantiBuffer(audioCtx).catch(() => {});
   }
   return audioCtx;
 }
@@ -161,13 +207,6 @@ export function playBhajanTaal(volume: number = 0.85, _rhythmicPattern: boolean 
 }
 
 /**
- * State tracking for Continuous House Puja Bell (घरगुती पूजा घंटी)
- */
-let activeGhantiGain: GainNode | null = null;
-let activeGhantiOscillators: OscillatorNode[] = [];
-let activeGhantiTimer: ReturnType<typeof setTimeout> | null = null;
-
-/**
  * Stop active continuous house puja bell ringing smoothly
  */
 export function stopHousePujaGhanti() {
@@ -175,143 +214,295 @@ export function stopHousePujaGhanti() {
     clearTimeout(activeGhantiTimer);
     activeGhantiTimer = null;
   }
+
+  // Fade out AudioBufferSource smoothly
   if (activeGhantiGain && audioCtx) {
     try {
       const now = audioCtx.currentTime;
       activeGhantiGain.gain.cancelScheduledValues(now);
       activeGhantiGain.gain.setValueAtTime(activeGhantiGain.gain.value, now);
-      activeGhantiGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      activeGhantiGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+      const prevSource = activeGhantiBufferSource;
       setTimeout(() => {
-        activeGhantiOscillators.forEach(osc => {
-          try { osc.stop(); } catch {}
-        });
-        activeGhantiOscillators = [];
-        activeGhantiGain = null;
-      }, 400);
+        try {
+          if (prevSource) {
+            prevSource.stop();
+          }
+        } catch {}
+        if (activeGhantiBufferSource === prevSource) {
+          activeGhantiBufferSource = null;
+          activeGhantiGain = null;
+        }
+      }, 350);
     } catch {
+      activeGhantiBufferSource = null;
       activeGhantiGain = null;
     }
+  } else {
+    activeGhantiBufferSource = null;
+    activeGhantiGain = null;
+  }
+
+  // Stop HTML5 audio element
+  if (ghantiHtmlAudio) {
+    try {
+      ghantiHtmlAudio.pause();
+      ghantiHtmlAudio.currentTime = 0;
+    } catch {}
+  }
+
+  // Stop any active synthetic oscillators
+  if (activeGhantiOscillators.length > 0) {
+    activeGhantiOscillators.forEach((osc) => {
+      try {
+        osc.stop();
+      } catch {}
+    });
+    activeGhantiOscillators = [];
   }
 }
 
 /**
- * Play Authentic Continuous House Puja Bell Sound "Ghanti" (घरगुती पूजा घंटी अखंड नाद)
- * Recreates the lively, continuous hand-ringing of a domestic brass puja ghanti
- * during daily aartis and rituals:
- * - Rapid alternating strikes (~6 strikes per second, oscillating left and right).
- * - Authentic domestic brass bell acoustic harmonics (fundamental ~1660 Hz).
- * - Overlapping singing resonance forming a continuous shimmering sound.
- * - Prolonged sweet trailing ring when the ringing slows down.
+ * Play authentic audio buffer of household puja ghanti
  */
-export function playHousePujaGhantiContinuous(durationSeconds: number = 3.5, volume: number = 0.85) {
+function playAuthenticGhantiBuffer(
+  ctx: AudioContext,
+  buffer: AudioBuffer,
+  durationSeconds: number,
+  volume: number
+) {
+  const startTime = ctx.currentTime;
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  source.loop = true;
+
+  const gainNode = ctx.createGain();
+  // Immediate sweet attack
+  gainNode.gain.setValueAtTime(0.001, startTime);
+  gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
+
+  // Natural bell decay at end of duration
+  gainNode.gain.setValueAtTime(volume, startTime + durationSeconds);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSeconds + 0.75);
+
+  source.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  source.start(startTime);
+  source.stop(startTime + durationSeconds + 0.8);
+
+  activeGhantiBufferSource = source;
+  activeGhantiGain = gainNode;
+
+  activeGhantiTimer = setTimeout(() => {
+    if (activeGhantiBufferSource === source) {
+      activeGhantiBufferSource = null;
+      activeGhantiGain = null;
+    }
+  }, (durationSeconds + 0.85) * 1000);
+}
+
+/**
+ * Procedural synthesis fallback if audio files cannot be loaded
+ */
+function playHousePujaGhantiSynthetic(durationSeconds: number = 7.0, volume: number = 0.88) {
   try {
-    stopHousePujaGhanti();
     const ctx = getAudioContext();
     const startTime = ctx.currentTime;
     const safeVolume = Math.min(Math.max(volume, 0.1), 1.0);
 
     const masterGain = ctx.createGain();
     
-    // High-pass filter to ensure clear, silvery brass tone without mud
+    // High-pass filter removes any lower-mid muddiness, preserving sweet crystalline high frequencies
     const hpFilter = ctx.createBiquadFilter();
     hpFilter.type = 'highpass';
-    hpFilter.frequency.setValueAtTime(450, startTime);
+    hpFilter.frequency.setValueAtTime(1100, startTime);
 
-    // Presence peaking filter for that bright, sacred Indian brass ghanti presence
-    const presenceFilter = ctx.createBiquadFilter();
-    presenceFilter.type = 'peaking';
-    presenceFilter.frequency.setValueAtTime(3200, startTime);
-    presenceFilter.gain.setValueAtTime(4.5, startTime);
-    presenceFilter.Q.setValueAtTime(1.2, startTime);
+    // Sweet resonance peak at bell fundamental (~3180 Hz)
+    const sweetResonance = ctx.createBiquadFilter();
+    sweetResonance.type = 'peaking';
+    sweetResonance.frequency.setValueAtTime(3180, startTime);
+    sweetResonance.gain.setValueAtTime(4.0, startTime);
+    sweetResonance.Q.setValueAtTime(2.2, startTime);
+
+    // Silvery sheen high-shelf for sparkling sweet chime presence
+    const sheenFilter = ctx.createBiquadFilter();
+    sheenFilter.type = 'peaking';
+    sheenFilter.frequency.setValueAtTime(6360, startTime);
+    sheenFilter.gain.setValueAtTime(3.5, startTime);
+    sheenFilter.Q.setValueAtTime(1.8, startTime);
 
     masterGain.connect(hpFilter);
-    hpFilter.connect(presenceFilter);
-    presenceFilter.connect(ctx.destination);
+    hpFilter.connect(sweetResonance);
+    sweetResonance.connect(sheenFilter);
+    sheenFilter.connect(ctx.destination);
 
     activeGhantiGain = masterGain;
     activeGhantiOscillators = [];
 
-    // Master volume envelope: instant rise, sustained ringing, and a sweet natural trailing decay
+    // Master volume envelope
     masterGain.gain.setValueAtTime(0.0001, startTime);
-    masterGain.gain.linearRampToValueAtTime(safeVolume, startTime + 0.03);
+    masterGain.gain.linearRampToValueAtTime(safeVolume, startTime + 0.015);
     masterGain.gain.setValueAtTime(safeVolume, startTime + durationSeconds);
-    masterGain.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSeconds + 2.0);
+    masterGain.gain.exponentialRampToValueAtTime(0.0001, startTime + durationSeconds + 2.8);
 
-    // Domestic handheld brass ghanti base fundamental (~1660 Hz / G#6)
-    const baseFreq = 1661.2;
-    // Rhythmic cadence of human hand ringing: ~0.165s between strikes (approx 6 strikes/sec)
-    const strikeInterval = 0.165;
-    const totalStrikes = Math.max(Math.floor(durationSeconds / strikeInterval), 8);
+    const baseFreq = 3180.0;
+    
+    const droneOsc = ctx.createOscillator();
+    const droneGain = ctx.createGain();
+    droneOsc.type = 'sine';
+    droneOsc.frequency.setValueAtTime(baseFreq, startTime);
+    droneGain.gain.setValueAtTime(0.0001, startTime);
+    droneGain.gain.linearRampToValueAtTime(0.05 * safeVolume, startTime + 0.08);
+    droneGain.gain.setValueAtTime(0.05 * safeVolume, startTime + durationSeconds);
+    droneGain.gain.exponentialRampToValueAtTime(0.00001, startTime + durationSeconds + 2.8);
+    droneOsc.connect(droneGain);
+    droneGain.connect(masterGain);
+    droneOsc.start(startTime);
+    droneOsc.stop(startTime + durationSeconds + 3.0);
+    activeGhantiOscillators.push(droneOsc);
 
-    for (let i = 0; i < totalStrikes; i++) {
-      const strikeTime = startTime + i * strikeInterval;
-      // Slight natural human oscillation micro-variance
-      const jitter = (Math.random() - 0.5) * 0.01;
-      const t = Math.max(startTime, strikeTime + jitter);
+    const cycleInterval = 0.156;
+    const totalCycles = Math.max(Math.floor(durationSeconds / cycleInterval), 10);
 
-      // Alternating left/right clapper strike inside the bell cup
-      const isLeft = i % 2 === 0;
-      const strikeFreq = isLeft ? baseFreq : baseFreq * 1.018; // ~30 cents micro-shift between sides
-      const strikeVel = isLeft ? 0.96 : 0.88;
+    for (let c = 0; c < totalCycles; c++) {
+      const cycleStart = startTime + c * cycleInterval;
+      const swingJitter = (Math.random() - 0.5) * 0.006;
+      const tPrimary = Math.max(startTime, cycleStart + swingJitter);
+      const reboundOffset = 0.046 + (Math.random() - 0.5) * 0.003;
+      const tRebound = tPrimary + reboundOffset;
 
-      // 1. Crisp brass clapper impact transient
-      const clickOsc = ctx.createOscillator();
-      const clickGain = ctx.createGain();
-      clickOsc.type = 'triangle';
-      clickOsc.frequency.setValueAtTime(3600, t);
-      clickOsc.frequency.exponentialRampToValueAtTime(1660, t + 0.012);
+      const isLastCycle = c === totalCycles - 1;
 
-      clickGain.gain.setValueAtTime(0.0001, t);
-      clickGain.gain.linearRampToValueAtTime(0.18 * strikeVel, t + 0.001);
-      clickGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.018);
-
-      clickOsc.connect(clickGain);
-      clickGain.connect(masterGain);
-      clickOsc.start(t);
-      clickOsc.stop(t + 0.025);
-      activeGhantiOscillators.push(clickOsc);
-
-      // 2. Harmonic modal partials of the domestic brass bell cup
-      // Decay of 0.42s overlaps continuously across strokes!
-      // The final stroke rings out for 2.2s for a peaceful spiritual resolution
-      const isLast = i === totalStrikes - 1;
-      const decay = isLast ? 2.2 : 0.42;
-
-      const partials = [
-        { ratio: 0.50, gain: 0.28 }, // hum tone
-        { ratio: 1.00, gain: 0.90 }, // fundamental
-        { ratio: 1.19, gain: 0.42 }, // tierce
-        { ratio: 1.50, gain: 0.48 }, // quint
-        { ratio: 2.00, gain: 0.32 }, // nominal
-        { ratio: 2.76, gain: 0.20 }, // silvery shimmer
+      const strokes = [
+        {
+          time: tPrimary,
+          velocity: 1.0,
+          freq: baseFreq,
+          decay: isLastCycle ? 3.0 : 0.28,
+        },
+        {
+          time: tRebound,
+          velocity: 0.74,
+          freq: baseFreq * 1.014,
+          decay: isLastCycle ? 3.2 : 0.30,
+        }
       ];
 
-      partials.forEach(p => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+      strokes.forEach((stroke) => {
+        const t = stroke.time;
+        const vel = stroke.velocity;
+        const freq = stroke.freq;
+        const decay = stroke.decay;
 
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(strikeFreq * p.ratio, t);
+        const clickOsc = ctx.createOscillator();
+        const clickGain = ctx.createGain();
+        clickOsc.type = 'triangle';
+        clickOsc.frequency.setValueAtTime(7800, t);
+        clickOsc.frequency.exponentialRampToValueAtTime(freq, t + 0.006);
 
-        const peak = p.gain * strikeVel * 0.26;
-        gain.gain.setValueAtTime(0.0001, t);
-        gain.gain.linearRampToValueAtTime(peak, t + 0.002);
-        gain.gain.exponentialRampToValueAtTime(0.00001, t + decay);
+        clickGain.gain.setValueAtTime(0.0001, t);
+        clickGain.gain.linearRampToValueAtTime(0.22 * vel, t + 0.0008);
+        clickGain.gain.exponentialRampToValueAtTime(0.00001, t + 0.012);
 
-        osc.connect(gain);
-        gain.connect(masterGain);
+        clickOsc.connect(clickGain);
+        clickGain.connect(masterGain);
+        clickOsc.start(t);
+        clickOsc.stop(t + 0.018);
+        activeGhantiOscillators.push(clickOsc);
 
-        osc.start(t);
-        osc.stop(t + decay + 0.05);
-        activeGhantiOscillators.push(osc);
+        const partials = [
+          { ratio: 1.00, gain: 0.95, durMult: 1.0 },
+          { ratio: 1.006, gain: 0.65, durMult: 0.95 },
+          { ratio: 1.19, gain: 0.30, durMult: 0.70 },
+          { ratio: 1.50, gain: 0.38, durMult: 0.75 },
+          { ratio: 2.00, gain: 0.58, durMult: 0.65 },
+          { ratio: 2.75, gain: 0.22, durMult: 0.45 },
+          { ratio: 0.50, gain: 0.12, durMult: 1.1 },
+        ];
+
+        partials.forEach((p) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq * p.ratio, t);
+
+          const peak = p.gain * vel * 0.24;
+          const strokeDur = decay * p.durMult;
+
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.linearRampToValueAtTime(peak, t + 0.001);
+          gain.gain.exponentialRampToValueAtTime(0.00001, t + strokeDur);
+
+          osc.connect(gain);
+          gain.connect(masterGain);
+
+          osc.start(t);
+          osc.stop(t + strokeDur + 0.03);
+          activeGhantiOscillators.push(osc);
+        });
       });
     }
 
     activeGhantiTimer = setTimeout(() => {
       activeGhantiGain = null;
       activeGhantiOscillators = [];
-    }, (durationSeconds + 2.2) * 1000);
+    }, (durationSeconds + 2.8) * 1000);
 
+  } catch (err) {
+    console.warn('Continuous house puja ghanti audio could not be synthesized:', err);
+  }
+}
+
+/**
+ * Play Authentic Continuous House Puja Bell Sound "Ghanti" (घरगुती पूजा घंटी अखंड नाद)
+ * Uses authentic household puja ghanti recording sourced from the internet,
+ * with continuous looping, sweet brass resonance, and smooth fade-out.
+ */
+export function playHousePujaGhantiContinuous(durationSeconds: number = 7.0, volume: number = 0.9) {
+  try {
+    stopHousePujaGhanti();
+    const ctx = getAudioContext();
+    const safeVolume = Math.min(Math.max(volume, 0.1), 1.0);
+
+    // 1. Primary: High-fidelity Web Audio AudioBuffer (zero-latency, seamless looping)
+    if (householdGhantiBuffer) {
+      playAuthenticGhantiBuffer(ctx, householdGhantiBuffer, durationSeconds, safeVolume);
+      return;
+    }
+
+    // 2. Start asynchronous preloading for future triggers
+    preloadHouseholdGhantiBuffer(ctx).then((buf) => {
+      // If buffer becomes ready during initial load
+      if (buf && !activeGhantiBufferSource && !activeGhantiGain) {
+        // Ready for future triggers
+      }
+    });
+
+    // 3. Immediate fallback: HTML5 Audio element with looping
+    if (ghantiHtmlAudio) {
+      ghantiHtmlAudio.currentTime = 0;
+      ghantiHtmlAudio.volume = safeVolume;
+      ghantiHtmlAudio.loop = true;
+      const playPromise = ghantiHtmlAudio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            activeGhantiTimer = setTimeout(() => {
+              stopHousePujaGhanti();
+            }, durationSeconds * 1000);
+          })
+          .catch(() => {
+            // If browser autoplay policy blocks audio element, fall back to procedural synth
+            playHousePujaGhantiSynthetic(durationSeconds, safeVolume);
+          });
+        return;
+      }
+    }
+
+    // 4. Procedural synthesis fallback
+    playHousePujaGhantiSynthetic(durationSeconds, safeVolume);
   } catch (err) {
     console.warn('Continuous house puja ghanti audio could not be played:', err);
   }

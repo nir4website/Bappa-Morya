@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Play, Pause, Sparkles, Heart } from 'lucide-react';
+import { Copy, Check, Sparkles, Heart } from 'lucide-react';
 import { AARTIS_DATA } from '../data/aartisData.ts';
 import { AartiItem } from '../types.ts';
 import { playTempleBell, playShankha } from '../utils/audioSynth.ts';
@@ -81,25 +81,6 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
                   </p>
                 </div>
               </div>
-
-              {/* Audio Play Trigger */}
-              <button
-                onClick={() => {
-                  if (currentPlayingId === ghalinLotangan.id && isPlaying) {
-                    onPauseTrack();
-                  } else {
-                    onPlayTrack(ghalinLotangan);
-                  }
-                }}
-                className={`p-3 rounded-full border transition-all active:scale-95 shadow-md cursor-pointer ${
-                  currentPlayingId === ghalinLotangan.id && isPlaying
-                    ? 'bg-[#FFD700] text-[#8B4513] border-white shadow-[0_0_15px_#FFD700]'
-                    : 'bg-[#5D2B0D] text-[#FFD700] border-[#D4AF37] hover:bg-[#72370F]'
-                }`}
-                title="Play Ghalin Lotangan"
-              >
-                {currentPlayingId === ghalinLotangan.id && isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-              </button>
             </div>
 
             {/* Meaning Box in English */}
@@ -159,24 +140,6 @@ export const DevotionalPrayers: React.FC<DevotionalPrayersProps> = ({
                   </p>
                 </div>
               </div>
-
-              <button
-                onClick={() => {
-                  if (currentPlayingId === mantrapushpanjali.id && isPlaying) {
-                    onPauseTrack();
-                  } else {
-                    onPlayTrack(mantrapushpanjali);
-                  }
-                }}
-                className={`p-3 rounded-full border transition-all active:scale-95 shadow-md cursor-pointer ${
-                  currentPlayingId === mantrapushpanjali.id && isPlaying
-                    ? 'bg-[#FFD700] text-[#8B4513] border-white shadow-[0_0_15px_#FFD700]'
-                    : 'bg-[#5D2B0D] text-[#FFD700] border-[#D4AF37] hover:bg-[#72370F]'
-                }`}
-                title="Play Mantrapushpanjali"
-              >
-                {currentPlayingId === mantrapushpanjali.id && isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
-              </button>
             </div>
 
             {/* Meaning Box in English */}

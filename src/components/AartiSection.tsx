@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { 
-  Play, Pause, Copy, Check, Share2, 
+  Copy, Check, Share2, 
   Sparkles, Flame, ChevronDown, ChevronUp, Music
 } from 'lucide-react';
 import { AARTIS_DATA } from '../data/aartisData.ts';
 import { AartiItem } from '../types.ts';
-import { playTempleBell, playKartal, playHousePujaGhantiContinuous } from '../utils/audioSynth.ts';
+import { playTempleBell, playKartal, playHousePujaGhantiContinuous, stopHousePujaGhanti } from '../utils/audioSynth.ts';
 import { triggerRedHibiscusShower } from '../utils/flowerShower.ts';
 import { BrassPanti, RedHibiscus, HandheldPoojaBellIcon, HaldiKumkumShendurBoxes, MarigoldFlower, PoojaBellStanding } from './FestiveIcons.tsx';
 import { RangoliPattern } from './RangoliPattern.tsx';
+import { HaldiKumkumPuffEffect, ActivePuff } from './HaldiKumkumPuffEffect.tsx';
+import { BrassThaliPattern } from './BrassThaliPattern.tsx';
 
 interface AartiSectionProps {
   currentPlayingId: string | null;
@@ -31,6 +33,8 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
   const [thaliFlowers, setThaliFlowers] = useState<number>(6);
   const [isBellRinging, setIsBellRinging] = useState<boolean>(false);
   const [tilakApplied, setTilakApplied] = useState<boolean>(false);
+  const [activePuffs, setActivePuffs] = useState<ActivePuff[]>([]);
+  const [puffPhase, setPuffPhase] = useState<'idle' | 'haldi' | 'kumkum'>('idle');
 
   const handleCopy = (aarti: AartiItem) => {
     const textToCopy = `${aarti.title}\n${aarti.subTitle}\n\n${aarti.lyrics.join('\n')}\n\n— Bappa Morya (गणपती बाप्पा मोरया)`;
@@ -66,18 +70,50 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
 
   const handleRingThaliBell = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    if (isBellRinging) {
+      stopHousePujaGhanti();
+      setIsBellRinging(false);
+      return;
+    }
     setIsBellRinging(true);
-    playHousePujaGhantiContinuous(3.5, 0.9);
+    playHousePujaGhantiContinuous(7.0, 0.9);
     onShowToast('🔔 House Puja Bell (घरगुती पूजा घंटी) — अखंड घंटानाद!');
-    setTimeout(() => setIsBellRinging(false), 3500);
+    setTimeout(() => setIsBellRinging(false), 7000);
   };
 
   const handleApplyTilak = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setTilakApplied(true);
-    playTempleBell(980, 0.65);
-    onShowToast('✨ Applied holy Haldi, Kumkum & Shendur (हळद-कुंकू-शेंदूर) tilak to Lord Ganesha!');
-    setTimeout(() => setTilakApplied(false), 3000);
+    setPuffPhase('haldi');
+
+    // 1. Send Yellow Puff (Haldi color) immediately
+    const haldiPuffId = Date.now();
+    playTempleBell(2250, 0.7);
+    setActivePuffs((prev) => [...prev, { id: haldiPuffId, type: 'haldi' }]);
+    onShowToast('✨ ॐ हळद समर्पयामि! Offered sacred Yellow Haldi puff to Lord Ganesha!');
+
+    // 2. Followed by Vermilion Puff (Kumkum color) after 400ms
+    const vermilionPuffId = haldiPuffId + 1;
+    setTimeout(() => {
+      setPuffPhase('kumkum');
+      playTempleBell(2640, 0.75);
+      setActivePuffs((prev) => [...prev, { id: vermilionPuffId, type: 'kumkum' }]);
+      onShowToast('✨ ॐ कुंकू समर्पयामि! Offered sacred Vermilion Kumkum puff to Lord Ganesha!');
+    }, 400);
+
+    // Reset phase and clean up puffs
+    setTimeout(() => {
+      setPuffPhase('idle');
+      setTilakApplied(false);
+    }, 2800);
+
+    setTimeout(() => {
+      setActivePuffs((prev) => prev.filter((p) => p.id !== haldiPuffId));
+    }, 2400);
+
+    setTimeout(() => {
+      setActivePuffs((prev) => prev.filter((p) => p.id !== vermilionPuffId));
+    }, 2800);
   };
 
   const handleDiyaClick = (e?: React.MouseEvent) => {
@@ -147,26 +183,6 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                     className="p-4 sm:p-5 flex items-center justify-between gap-3 cursor-pointer select-none"
                   >
                     <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                      {/* Play/Pause Button for Aarti */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isTrackPlaying) {
-                            onPauseTrack();
-                          } else {
-                            onPlayTrack(aarti);
-                          }
-                        }}
-                        className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 border transition-all active:scale-95 shadow-md cursor-pointer ${
-                          isTrackPlaying
-                            ? 'bg-[#FFD700] text-[#8B4513] border-white shadow-[0_0_15px_#FFD700] animate-pulse'
-                            : 'bg-[#5D2B0D] text-[#FFD700] border-[#D4AF37] hover:bg-[#8B4513] hover:border-[#FFD700]'
-                        }`}
-                        title={isTrackPlaying ? 'Pause Aarti melody' : 'Play Aarti melody'}
-                      >
-                        {isTrackPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                      </button>
-
                       <div className="min-w-0">
                         <h3 className="font-festive text-lg sm:text-xl font-bold text-[#FFFDD0] truncate font-devanagari-serif">
                           {aarti.title}
@@ -261,15 +277,18 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                   <span>Interactive Puja Ritual</span>
                 </div>
                 <h3 className="font-festive text-2xl font-bold text-[#FFFDD0]">
-                  Traditional Silver Aarti Thali (चांदीचे ताट)
+                  Traditional Brass Aarti Thali (पितळी ताट)
                 </h3>
                 <p className="text-xs text-[#FFFDD0]/90">
-                  Lustrous silver platter adorned with 2 glowing Diyas, Haldi-Kumkum-Shendur boxes, Ghanti, and fresh flowers.
+                  Lustrous brass platter engraved with Gayatri Mantra & ॐ, adorned with 2 glowing Diyas, Haldi-Kumkum-Shendur boxes, Ghanti, and fresh flowers.
                 </p>
               </div>
 
               {/* Interactive Visual Brass Aarti Thali with 2 Diyas, Bell, Haldi-Kumkum-Shendur & Flowers */}
-              <div className="relative py-2 sm:py-4 flex items-center justify-center">
+              <div className="relative py-2 sm:py-4 flex items-center justify-center overflow-visible">
+                {/* Yellow & Vermilion Powder Puff Burst Effect */}
+                <HaldiKumkumPuffEffect puffs={activePuffs} />
+
                 <div
                   className={`relative w-72 h-72 sm:w-80 sm:h-80 rounded-full p-3.5 shadow-2xl transition-all duration-700 select-none ${
                     isRotatingThali ? 'rotate-360 scale-105 aarti-plate-glow' : 'hover:scale-102'
@@ -296,65 +315,65 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                     />
                   ))}
 
-                  {/* Inner Silver Plate Basin (चांदीचे ताट) */}
-                  <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_center,_#FFFFFF_0%,_#E2E8F0_35%,_#CBD5E1_68%,_#94A3B8_100%)] shadow-[inset_0_3px_15px_rgba(0,0,0,0.22),_0_2px_8px_rgba(0,0,0,0.15)] border-2 border-dashed border-[#94A3B8] relative overflow-hidden flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
+                  {/* Inner Polished Brass Plate Basin (पितळी ताट with Gayatri Mantra & Om) */}
+                  <div className="w-full h-full rounded-full bg-[radial-gradient(circle_at_center,_#FFFCE8_0%,_#FCE57A_22%,_#EAB308_48%,_#CA8A04_72%,_#78350F_100%)] shadow-[inset_0_3px_22px_rgba(0,0,0,0.5),_0_2px_10px_rgba(0,0,0,0.3)] border-2 border-[#FFE87C] relative overflow-hidden flex flex-col items-center justify-between p-2.5 sm:p-3 text-center">
                     
-                    {/* Subtle Silver Engraved Rangoli Mandala */}
-                    <div className="absolute inset-2 opacity-25 text-[#334155] pointer-events-none">
-                      <RangoliPattern variant="lotus" size="100%" />
-                    </div>
-
-                    {/* Concentric Engraved Silver Ring Lines */}
-                    <div className="absolute inset-8 rounded-full border border-[#64748B]/35 pointer-events-none" />
-                    <div className="absolute inset-16 rounded-full border border-[#94A3B8]/40 pointer-events-none" />
+                    {/* Authentic Engraved Brass Thali: Fluted Rim, Circular Gayatri Mantra & Center Om Sunburst */}
+                    <BrassThaliPattern />
 
                     {/* =========================================================
                         TOP SECTION: Haldi, Kumkum, and Shendur Boxes (हळद-कुंकू-शेंदूर)
                        ========================================================= */}
                     <div className="relative z-20 flex flex-col items-center mt-1">
                       <HaldiKumkumShendurBoxes size={72} onClick={handleApplyTilak} />
-                      <div className="mt-0.5 px-2 py-0.5 rounded-full bg-[#1E293B]/85 border border-[#94A3B8]/70 text-[9px] font-bold text-[#F8FAFC] tracking-wider pointer-events-none shadow-sm">
+                      <div className="mt-0.5 px-2 py-0.5 rounded-full bg-[#5D2B0D]/90 border border-[#D4AF37] text-[9px] font-bold text-[#FFE87C] tracking-wider pointer-events-none shadow-sm backdrop-blur-[2px]">
                         हळद • कुंकू • शेंदूर
                       </div>
                     </div>
 
                     {/* =========================================================
-                        MIDDLE SECTION: 2 Diyas (Left & Right) + Brass Pooja Bell
+                        MIDDLE SECTION: 2 Diyas Together in Center + Ghanti on Right
                        ========================================================= */}
-                    <div className="relative z-20 w-full px-2 flex items-center justify-between my-auto">
-                      {/* Left Diya (निरांजन १) */}
-                      <div
-                        onClick={handleDiyaClick}
-                        className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-95 group"
-                        title="Left Brass Diya (डावी निरांजन) - Tap for Blessing"
-                      >
-                        <BrassPanti size={42} showFlame={true} />
-                        <span className="text-[8px] font-bold text-[#1E293B] group-hover:text-[#991B1B] transition-colors font-devanagari-serif">
-                          निरांजन
-                        </span>
+                    <div className="relative z-20 w-full px-3 sm:px-4 flex items-center justify-between my-auto">
+                      {/* Left balancing spacer to keep Diyas perfectly centered */}
+                      <div className="w-12 flex-shrink-0" aria-hidden="true" />
+
+                      {/* Both Diyas Together in the Centre (दोन्ही निरांजन एकत्र मध्यभागी) */}
+                      <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+                        {/* Diya 1 */}
+                        <div
+                          onClick={handleDiyaClick}
+                          className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-95 group"
+                          title="Brass Diya (निरांजन) - Tap for Blessing"
+                        >
+                          <BrassPanti size={40} showFlame={true} />
+                          <span className="text-[8px] font-bold text-[#5D2B0D] group-hover:text-[#991B1B] transition-colors font-devanagari-serif drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">
+                            निरांजन
+                          </span>
+                        </div>
+
+                        {/* Diya 2 */}
+                        <div
+                          onClick={handleDiyaClick}
+                          className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-95 group"
+                          title="Brass Diya (निरांजन) - Tap for Blessing"
+                        >
+                          <BrassPanti size={40} showFlame={true} />
+                          <span className="text-[8px] font-bold text-[#5D2B0D] group-hover:text-[#991B1B] transition-colors font-devanagari-serif drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">
+                            निरांजन
+                          </span>
+                        </div>
                       </div>
 
-                      {/* Center Standing Brass Pooja Bell (पितळी पूजा घंटी) */}
+                      {/* Standing Brass Pooja Bell shifted to the Right (उजवीकडे पूजा घंटी) */}
                       <div
                         onClick={handleRingThaliBell}
-                        className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-90 group px-1"
+                        className="w-12 flex-shrink-0 flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-90 group"
                         title="Tap to Ring House Puja Bell (घरगुती पूजा घंटी अखंड नाद)"
                       >
                         <PoojaBellStanding size={38} isRinging={isBellRinging} />
-                        <span className="text-[8px] font-bold text-[#1E293B] tracking-wider font-devanagari-serif mt-0.5">
+                        <span className="text-[8px] font-bold text-[#5D2B0D] tracking-wider font-devanagari-serif mt-0.5 drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)] whitespace-nowrap">
                           {isBellRinging ? '🔔 अखंड नाद...' : '🔔 पूजा घंटी'}
-                        </span>
-                      </div>
-
-                      {/* Right Diya (निरांजन २) */}
-                      <div
-                        onClick={handleDiyaClick}
-                        className="flex flex-col items-center cursor-pointer transition-transform hover:scale-115 active:scale-95 group"
-                        title="Right Brass Diya (उजवी निरांजन) - Tap for Blessing"
-                      >
-                        <BrassPanti size={42} showFlame={true} />
-                        <span className="text-[8px] font-bold text-[#1E293B] group-hover:text-[#991B1B] transition-colors font-devanagari-serif">
-                          निरांजन
                         </span>
                       </div>
                     </div>
@@ -426,7 +445,7 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                   className="w-full py-3.5 rounded-2xl bg-[#D4AF37] hover:bg-[#FFD700] text-[#8B4513] font-bold text-base sm:text-lg border-2 border-white shadow-[0_0_20px_rgba(255,215,0,0.5)] flex items-center justify-center gap-2.5 transition-all active:scale-95 group cursor-pointer"
                 >
                   <Flame className="w-5 h-5 text-[#8B4513] group-hover:scale-110" />
-                  <span>Perform Aarti (ओवाळा)</span>
+                  <span>Perform Puja</span>
                 </button>
 
                 {/* Additional Ritual Actions */}
@@ -448,11 +467,21 @@ export const AartiSection: React.FC<AartiSectionProps> = ({
                   {/* Haldi Kumkum Button */}
                   <button
                     onClick={handleApplyTilak}
-                    className="py-2.5 px-2 rounded-xl bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFE87C] text-xs font-semibold border border-[#D4AF37]/60 flex flex-col sm:flex-row items-center justify-center gap-1 active:scale-95 cursor-pointer"
-                    title="Apply Sacred Haldi-Kumkum Tilak"
+                    className={`py-2.5 px-2 rounded-xl text-xs font-semibold border transition-all flex flex-col sm:flex-row items-center justify-center gap-1 active:scale-95 cursor-pointer ${
+                      puffPhase === 'haldi'
+                        ? 'bg-[#EAB308] text-[#713F12] border-[#FEF08A] shadow-[0_0_18px_rgba(250,204,21,0.95)] scale-105'
+                        : puffPhase === 'kumkum'
+                        ? 'bg-[#DC2626] text-[#FFFDD0] border-[#FECDD3] shadow-[0_0_18px_rgba(220,38,38,0.95)] scale-105'
+                        : 'bg-[#5D2B0D] hover:bg-[#8B4513] text-[#FFE87C] border-[#D4AF37]/60'
+                    }`}
+                    title="Offer Sacred Haldi (Yellow) & Kumkum (Vermilion) Puff"
                   >
-                    <span className="text-sm">✨</span>
-                    <span className="truncate">हळद-कुंकू</span>
+                    <span className="text-sm">
+                      {puffPhase === 'haldi' ? '🟡' : puffPhase === 'kumkum' ? '🔴' : '✨'}
+                    </span>
+                    <span className="truncate">
+                      {puffPhase === 'haldi' ? 'हळद...' : puffPhase === 'kumkum' ? 'कुंकू...' : 'हळद-कुंकू'}
+                    </span>
                   </button>
 
                   {/* Offer Flower Button (पुष्पवृष्टी) */}

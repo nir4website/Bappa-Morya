@@ -245,6 +245,96 @@
   - Deleted only this specific button without touching any other elements.
   - Removed unused import and verified zero lint errors and successful compilation.
 
+### Session Step 21: User Request
+> "do not do any other changes . do only what I tell you to do Delete this Radio button from all aaratis
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted the circular button from the Aarti header matching CSS selector `section#aarti > div > div > div > div > div > div > button`.
+  - Deleted this circular button from all Aarti items.
+  - Cleaned up unused imports, verified with linter and compilation.
+
+### Session Step 22: User Request
+> "Do only changes that I tell you to do do not change anything else. Replace this bell sound
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted element: Pooja bell (`PoojaBellStanding`) in the visual Aarti thali matching the CSS selector.
+  - Replaced the continuous bell synthesizer model with an authentic domestic brass ghanti acoustic profile.
+
+### Session Step 23: User Request
+> "fine tune the puja ghanti in the aarti thali to more sharper and sweeter it is not sounding like the sample provided by me"
+- **Action & Implementation:**
+  - Fine-tuned the continuous house puja ghanti audio model in `src/utils/audioSynth.ts` to closely match the uploaded sample:
+    - **Sharper Strike**: Tuned fundamental pitch up to crystalline ~3180 Hz (G7/G#7) with a crisp 7.8 kHz clapper impact transient.
+    - **Sweeter Resonance**: Integrated high-resonance peaking at 3180 Hz, 6360 Hz super-octave shimmer, and a 1100 Hz high-pass filter cutting off boxy frequencies.
+    - **Lively Cadence**: Adjusted cadence to ~6.4 cycles/sec with dual-stroke clapper bounce and sustained singing body resonance.
+  - Verified with zero lint errors and successful production compilation.
+
+### Session Step 24: User Request
+> "change the text to "Perform Puja", do not make any other changes
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted element matching CSS selector `section#aarti > div > div > div > div > div > button > span`.
+  - Changed the button label from `"Perform Aarti (ओवाळा)"` to `"Perform Puja"` with zero other changes made.
+  - Verified with TypeScript lint and successful compilation.
+
+### Session Step 25: User Request
+> "remove this button from the mantras, do not do any other changes
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted the circular audio play button matching CSS selector `section#mantra > div > div > div > div > button > svg`.
+  - Removed this audio play/pause button from both cards in the Mantras section (Ghalin Lotangan & Mantrapushpanjali) with zero other changes made.
+  - Removed unused imports, passed TypeScript linting, and compiled successfully.
+
+### Session Step 26: User Request
+> "on clicking this button send a puff of yellow (haldi color) followed by Vermillon( kumkum) do not change anything else
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted element matching CSS selector `section#aarti > div > div > div > div > div > div > button:nth-of-type(2) > span:nth-of-type(2)` (Haldi-Kumkum offering button).
+  - Created `src/components/HaldiKumkumPuffEffect.tsx` and custom `@keyframes` in `src/index.css` (`haldiKumkumCloud`, `powderParticleFly`).
+  - Configured two-phase sequential offering on click:
+    1. Instant burst of sacred bright turmeric yellow powder puff (Haldi) with billowing cloud and floating golden-yellow dust particles.
+    2. Followed 400ms later by sacred vermilion red powder puff (Kumkum) with billowing cloud and floating vermilion dust particles.
+  - Applied reactive styling to the button (yellow glow phase -> vermilion glow phase), verified with TypeScript linter and production compilation.
+
+### Session Step 27: User Request
+> "Change the thali to Brass like the enclosed image, do not change anything else
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted element matching CSS selector `section#aarti > div > div > div > div > div > div:nth-of-type(13)` (Thali basin).
+  - Analyzed the user-provided photograph of the authentic Indian Brass Puja Thali (`brass thali.jpg`).
+  - Created `src/components/BrassThaliPattern.tsx` faithfully reproducing all authentic details of the brass thali in the image:
+    1. Rich polished golden brass surface with metallic radial specular luster and deep chiseled repoussé relief.
+    2. 64 radial fluted godron sunburst ribs along the outer perimeter with alternating shadow and specular highlight grooves.
+    3. Concentric embossed brass ridge rings and outer scalloped beaded pearl rim.
+    4. Sacred Vedic Gayatri Mantra engraved in circular Devanagari script: `ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्`.
+    5. Radiating golden sunburst rays around the central medallion.
+    6. Embossed 3D sacred **ॐ** (Om) in the center with golden relief and chiseled metallic bevels.
+  - Replaced the previous silver plate basin with the new polished Brass Thali pattern while preserving all interactive puja items.
+  - Verified with TypeScript linter and production compilation.
+
+### Session Step 28: User Request
+> "bring both diyas to gether in the centre shift Ghanti to the right. Do not make any other changes
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted elements matching CSS selectors for the Thali platter.
+  - Reorganized the middle section of the Brass Aarti Thali:
+    1. Positioned both glowing Niranjan Diyas side by side in the exact optical centre of the Thali platter.
+    2. Shifted the standing Brass House Puja Bell (पूजा घंटी) to the right side of the Thali with balanced spacing.
+  - Preserved all interactive tap handlers, blessings, continuous bell ringing audio, and flame animations with zero other changes made.
+  - Passed TypeScript linting and production compilation.
+
+### Session Step 29: User Request
+> "make this bell like the main bell donot do any other changes
+> Apply style changes to the selected element(s)."
+- **Action & Implementation:**
+  - Targeted elements matching CSS selectors:
+    - Selector 1: The puja bell SVG on the Aarti Thali (`PoojaBellStanding`).
+    - Selector 2: The main puja bell SVG in the header (`HandheldPoojaBellIcon`).
+  - Redesigned `PoojaBellStanding` in `src/components/FestiveIcons.tsx` to match the exact visual styling, vector paths, gradient colors (`poojaBrass`), Garuda finial handle, central knob, and flaring bell cup of the main bell (`HandheldPoojaBellIcon`).
+  - Maintained full support for the interactive tap-to-ring audio, continuous ringing animation, and soundwave ripple effects.
+  - Ensured no other elements or behaviors were altered.
+  - Passed TypeScript linting and production compilation.
+
 ---
 
 ## 4. Technology Stack
